@@ -1,0 +1,10 @@
+小兒救護學習網站｜Cloudflare Workers 直接部署包
+
+1. 安裝 Node.js 22 以上版本
+2. 在本資料夾開啟終端機
+3. 執行：npm install
+4. 執行：npm run login
+5. 執行：npm run deploy
+6. 到 Cloudflare Workers 的 Domains 頁面綁定自己的網域
+
+完整說明請閱讀上一層的 README_網站架設說明.md。

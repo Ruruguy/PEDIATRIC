@@ -1,0 +1,12 @@
+{
+  "name": "peds-field-learning-deploy",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "login": "wrangler login",
+    "deploy": "wrangler deploy --config wrangler.json"
+  },
+  "devDependencies": {
+    "wrangler": "4.92.0"
+  }
+}

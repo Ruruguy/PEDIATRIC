@@ -1,0 +1,17 @@
+小兒救護網站上線檔案
+整理日期：2026-08-11
+
+README_網站架設說明.md
+  中文架站、網域綁定與更新說明。
+
+小兒救護網站_Cloudflare直接部署包.zip
+  已建置完成的 Worker 程式與網站資源，可直接部署。
+
+小兒救護網站_完整原始碼.zip
+  完整網站原始碼，供備份、維護或交付網站公司。
+
+Cloudflare_Workers_直接部署包/
+  直接部署包的未壓縮版本，方便檢查與操作。
+
+目前正式網站：
+https://pediatric-rescue-learning.augusru.chatgpt.site
