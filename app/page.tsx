@@ -145,7 +145,18 @@ const assessmentRows = [
   ["異常", "異常", "異常", "心肺衰竭／停止", "立即 CPR／復甦"],
 ];
 
+const vitalSignRows = [
+  { stage: "新生兒", age: "出生–未滿 28 日", heart: "120–160", breathing: "40–60", pressure: "SBP＜60" },
+  { stage: "嬰兒", age: "未滿 1 歲", heart: "80–140", breathing: "30–40", pressure: "SBP＜70" },
+  { stage: "幼兒", age: "約 1–3 歲", heart: "80–120", breathing: "25–30", pressure: "SBP＜70＋(年齡×2)" },
+  { stage: "學齡前", age: "約 4–5 歲", heart: "70–115", breathing: "20–25", pressure: "SBP＜70＋(年齡×2)" },
+  { stage: "學齡兒童", age: "約 6–10 歲", heart: "70–115", breathing: "15–25", pressure: "SBP＜70＋(年齡×2)" },
+  { stage: "青少年", age: "大於 10 歲", heart: "70–90", breathing: "15–20", pressure: "SBP＜90" },
+];
+
 type RulerMode = "length" | "weight";
+type OhcaKey = "newborn" | "infant" | "child";
+type RhythmKey = "shockable" | "nonshockable";
 
 const rulerZones = [
   { key: "gray", label: "灰", minCm: 46.8, maxCm: 59.2, minKg: 3, maxKg: 5, estimate: 4, color: "#9aa0a3", ink: "#102b31", cuffed: "3.0", uncuffed: "2.5", depth: "9–10.5" },
@@ -169,6 +180,72 @@ const lmaSizeFor = (weight: number) => {
   return "3";
 };
 
+const ohcaFlows: Record<OhcaKey, { label: string; scope: string; warning: string; accent: string; steps: { phase: string; title: string; detail: string; action: string; mnemonic?: string }[] }> = {
+  newborn: {
+    label: "出生時新生兒復甦",
+    scope: "出生現場／尚有臍帶",
+    warning: "只用於出生時的轉銜復甦。已離開出生情境而發生心跳停止者，依嬰兒／兒童 OHCA 與地方 SOP 處理。",
+    accent: "#eeb9a8",
+    steps: [
+      { phase: "PREPARE", title: "產前簡報與器材檢查", detail: "確認角色、保暖、通氣、監測、進階氣道與血管通路器材；至少一人能執行有效通氣。", action: "口頭完成團隊簡報，確認保暖與 PPV 裝備可立即使用。" },
+      { phase: "FIRST LOOK", title: "出生後快速判斷", detail: "足月？肌張力良好？有呼吸或哭聲？若皆是，繼續評估；任一否，進入處置。", action: "保暖、擦乾、擺位、刺激；只有需要時才清理氣道。", mnemonic: "抽、擦、暖、激、擺｜必要時抽吸・擦乾・保暖・刺激・擺位" },
+      { phase: "VENTILATE", title: "呼吸暫停／喘息或 HR＜100", detail: "立即開始有效通氣，接上右手／手腕脈搏血氧，考慮心電監測。胸廓起伏與心率上升是最重要的成效指標。", action: "執行 PPV；若胸廓不起伏，立即做通氣矯正並考慮進階氣道。", mnemonic: "擺、吸、漏、壓｜重新擺位・必要時抽吸・檢查面罩漏氣・逐步調整通氣壓力" },
+      { phase: "REASSESS", title: "評估心率並分流", detail: "先聽診心前區；可在臍帶根部觸摸臍動脈搏動，若臍帶不適用則觸摸上臂內側肱動脈。觸診只作快速估計，應以 ECG／聽診確認。", action: "HR≥100：依呼吸狀況支持；HR 60–99：持續有效 PPV；有效通氣後 HR＜60：進入胸部按壓。" },
+      { phase: "COMPRESS", title: "HR＜60：按壓＋通氣", detail: "進階氣道或喉罩、100% 氧、建立 UVC／IO；胸部按壓與通氣協調為 3:1。", action: "雙拇指環抱按壓；持續約 60 秒後在不中斷通氣下重評心率。" },
+      { phase: "MEDICATION", title: "仍 HR＜60：藥物與原因", detail: "依授權以 UVC／IO 給 Epinephrine，每 3–5 分鐘可追加；同時考慮低血容與氣胸。", action: "持續有效通氣與按壓，準備復甦後照護、家屬溝通、後送與團隊檢討。" },
+    ],
+  },
+  infant: {
+    label: "嬰兒 OHCA",
+    scope: "未滿一歲／非出生轉銜",
+    warning: "兒科心跳停止多與缺氧相關，不能只做 hands-only CPR；通氣品質和按壓同等重要。",
+    accent: "#8fc9c5",
+    steps: [
+      { phase: "RECOGNIZE", title: "確認無反應與呼吸異常", detail: "確認環境安全、刺激並呼叫；無正常呼吸或只有瀕死喘息，立即啟動支援並取得 AED／監視器。", action: "指定人員：壓胸、氣道、AED、計時／紀錄、通路與藥物。" },
+      { phase: "PULSE ≤10 SEC", title: "同步檢查呼吸與肱動脈", detail: "10 秒內無法明確摸到脈搏，視為心跳停止。若 HR＜60 且灌流不良，經氧合與通氣仍未改善，也開始 CPR。", action: "不要因反覆摸脈搏延誤按壓。" },
+      { phase: "HIGH-QUALITY CPR", title: "立即按壓並有效通氣", detail: "100–120 次／分，深度約胸廓前後徑 1/3（約 4 cm），完整回彈、中斷＜10 秒。", action: "單人 30:2；雙人 15:2。2025：使用單手掌根或雙拇指環抱，不再使用兩指按壓。" },
+      { phase: "MONITOR", title: "BVM 給氧並接上 AED／監視器", detail: "每口氣約 1 秒、看見胸廓起伏；避免過快、過量通氣。每 2 分鐘換手並重新判讀節律。", action: "優先用兒童衰減器／貼片；無法取得時依設備指示與地方規範使用現有 AED。" },
+      { phase: "RHYTHM", title: "判讀：可電擊或不可電擊", detail: "可電擊：VF／pVT；不可電擊：Asystole／PEA。選擇下方節律後，依分支執行 2 分鐘循環。", action: "按壓持續到除顫器充電完成，清場電擊後立刻恢復 CPR。" },
+      { phase: "ROSC / TRANSPORT", title: "每 2 分鐘重評與尋找原因", detail: "反覆節律判讀、換手、確認通氣與可逆原因；出現 ROSC 時轉入復甦後照護。", action: "持續監測氧合、通氣、灌流與血糖，提前通知接收醫院並依地方 SOP 後送。" },
+    ],
+  },
+  child: {
+    label: "兒童 OHCA",
+    scope: "一歲至青春期",
+    warning: "青春期後依成人流程。年齡不確定時，以是否出現青春期徵象及地方 SOP 決定流程。",
+    accent: "#f1cd66",
+    steps: [
+      { phase: "RECOGNIZE", title: "確認無反應與呼吸異常", detail: "確認環境安全、刺激並呼叫；無正常呼吸或只有瀕死喘息，立即啟動支援並取得 AED／監視器。", action: "指定人員：壓胸、氣道、AED、計時／紀錄、通路與藥物。" },
+      { phase: "PULSE ≤10 SEC", title: "同步檢查呼吸與頸／股動脈", detail: "10 秒內無法明確摸到脈搏，視為心跳停止。若 HR＜60 且灌流不良，經氧合與通氣仍未改善，也開始 CPR。", action: "不要因反覆摸脈搏延誤按壓。" },
+      { phase: "HIGH-QUALITY CPR", title: "立即按壓並有效通氣", detail: "100–120 次／分，深度約胸廓前後徑 1/3（約 5 cm），完整回彈、中斷＜10 秒。", action: "依體型使用單手或雙手掌根；單人 30:2，雙人 15:2。" },
+      { phase: "MONITOR", title: "BVM 給氧並接上 AED／監視器", detail: "每口氣約 1 秒、看見胸廓起伏；避免過快、過量通氣。每 2 分鐘換手並重新判讀節律。", action: "優先使用手動去顫器；若無，依設備指示使用兒童模式／衰減器或可取得的 AED。" },
+      { phase: "RHYTHM", title: "判讀：可電擊或不可電擊", detail: "可電擊：VF／pVT；不可電擊：Asystole／PEA。選擇下方節律後，依分支執行 2 分鐘循環。", action: "按壓持續到除顫器充電完成，清場電擊後立刻恢復 CPR。" },
+      { phase: "ROSC / TRANSPORT", title: "每 2 分鐘重評與尋找原因", detail: "反覆節律判讀、換手、確認通氣與可逆原因；出現 ROSC 時轉入復甦後照護。", action: "持續監測氧合、通氣、灌流與血糖，提前通知接收醫院並依地方 SOP 後送。" },
+    ],
+  },
+};
+
+const rhythmBranches: Record<RhythmKey, { label: string; subtitle: string; cycles: { title: string; detail: string }[] }> = {
+  shockable: {
+    label: "可電擊：VF／pVT",
+    subtitle: "電擊與 CPR 交替，藥物時機不要提前。",
+    cycles: [
+      { title: "第 1 次電擊", detail: "2 J/kg（流程允許 2–4 J/kg；為教學一致性採 2 J/kg），立刻 CPR 2 分鐘並建立 IV／IO。" },
+      { title: "第 2 次電擊", detail: "4 J/kg，立刻 CPR 2 分鐘；Epinephrine 0.01 mg/kg IV／IO，每 3–5 分鐘，考慮進階氣道與波形 ETCO₂。" },
+      { title: "第 3 次及後續", detail: "≥4 J/kg，最高 10 J/kg 或成人最大劑量；CPR 2 分鐘，Amiodarone 5 mg/kg 或 Lidocaine 1 mg/kg，處理可逆原因。" },
+    ],
+  },
+  nonshockable: {
+    label: "不可電擊：Asystole／PEA",
+    subtitle: "不要電擊；Epinephrine 越早越好。",
+    cycles: [
+      { title: "立即 CPR＋給藥", detail: "持續 CPR，建立 IV／IO；Epinephrine 0.01 mg/kg IV／IO 儘早給予，之後每 3–5 分鐘。" },
+      { title: "每 2 分鐘重評", detail: "重新判讀節律與脈搏；考慮進階氣道與波形 ETCO₂，持續高品質 CPR。" },
+      { title: "積極找可逆原因", detail: "低血容、缺氧、酸血症、低血糖、鉀離子異常、低體溫、張力性氣胸、心包填塞、毒物與血栓等。" },
+    ],
+  },
+};
+
 export default function Home() {
   const [age, setAge] = useState<AgeKey>("newborn");
   const [emergency, setEmergency] = useState<EmergencyKey>("breathing");
@@ -179,6 +256,9 @@ export default function Home() {
   const [rulerMode, setRulerMode] = useState<RulerMode>("length");
   const [lengthCm, setLengthCm] = useState(92);
   const [measuredWeight, setMeasuredWeight] = useState(14);
+  const [ohcaPath, setOhcaPath] = useState<OhcaKey>("infant");
+  const [ohcaStep, setOhcaStep] = useState(0);
+  const [ohcaRhythm, setOhcaRhythm] = useState<RhythmKey | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("peds-field-skills");
@@ -200,6 +280,14 @@ export default function Home() {
   const activeZone = rulerMode === "length" ? lengthZone : weightZone;
   const workingWeight = rulerMode === "length" ? activeZone.estimate : measuredWeight;
   const outsideColorRange = rulerMode === "weight" && (measuredWeight < 3 || measuredWeight > 36);
+  const activeOhca = ohcaFlows[ohcaPath];
+  const currentOhcaStep = activeOhca.steps[ohcaStep];
+  const ohcaProgress = Math.round(((ohcaStep + 1) / activeOhca.steps.length) * 100);
+  const selectOhcaPath = (key: OhcaKey) => {
+    setOhcaPath(key);
+    setOhcaStep(0);
+    setOhcaRhythm(null);
+  };
 
   return (
     <main id="top">
@@ -208,7 +296,9 @@ export default function Home() {
         <button className="menu-button" aria-label="開啟導覽" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? "關閉" : "目錄"}</button>
         <nav className={menuOpen ? "show" : ""} aria-label="網站導覽">
           <a href="#ages" onClick={() => setMenuOpen(false)}>年齡分流</a>
+          <a href="#vitals" onClick={() => setMenuOpen(false)}>生命徵象</a>
           <a href="#navigator" onClick={() => setMenuOpen(false)}>急症導航</a>
+          <a href="#ohca" onClick={() => setMenuOpen(false)}>OHCA 流程</a>
           <a href="#skills" onClick={() => setMenuOpen(false)}>技術教室</a>
           <a href="#ruler" onClick={() => setMenuOpen(false)}>互動小兒尺</a>
           <a href="#teaching" onClick={() => setMenuOpen(false)}>情境教學</a>
@@ -252,8 +342,33 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="vitals-section" id="vitals">
+        <div className="vitals-heading">
+          <div className="section-label"><span>02</span><p>VITAL SIGNS<br />生命徵象</p></div>
+          <div><p className="micro">RESTING REFERENCE · TREND MATTERS</p><h2>先知道正常，<br />才看得見變化。</h2></div>
+          <p>以下是資料夾內 EMT-P 教科書的年齡平均參考值，適合出勤初評與教學速查。請在孩子安靜、未哭鬧時量測，並以連續趨勢和整體表現判讀。</p>
+        </div>
+
+        <div className="vitals-table-wrap">
+          <table className="vitals-table">
+            <caption>小兒各年齡層安靜時生命徵象參考值</caption>
+            <thead><tr><th scope="col">年齡層</th><th scope="col">年齡</th><th scope="col">心率 <small>bpm</small></th><th scope="col">呼吸率 <small>次／分</small></th><th scope="col">低血壓判定公式 <small>收縮壓 mmHg</small></th></tr></thead>
+            <tbody>{vitalSignRows.map((row) => <tr key={row.stage}><th scope="row">{row.stage}</th><td>{row.age}</td><td><b>{row.heart}</b></td><td><b>{row.breathing}</b></td><td><b>{row.pressure}</b></td></tr>)}</tbody>
+          </table>
+        </div>
+
+        <div className="vitals-notes">
+          <article><span>01</span><div><b>血氧 SpO₂</b><p>健康兒童在海平面多為 97–100%；95–96% 應結合呼吸作功、灌流與趨勢重新評估，≤94% 視為異常警訊。新生兒出生最初數分鐘應使用出生轉銜目標，不可直接套用此值。</p></div></article>
+          <article><span>02</span><div><b>體溫</b><p>新生兒正常腋溫為 36.5–37.5°C。其他年齡須記錄測量部位與方式；環境、發燒、包覆及運動都會影響讀值。</p></div></article>
+          <article><span>03</span><div><b>低血壓是晚期警訊</b><p>新生兒 SBP＜60、嬰兒 SBP＜70、1–10 歲 SBP＜70＋(年齡×2)、大於 10 歲 SBP＜90 mmHg。血壓正常仍不能排除代償性休克。</p></div></article>
+        </div>
+
+        <div className="vitals-caution"><b>判讀提醒</b><p>哭鬧、疼痛、發燒、脫水、藥物與焦慮常使心率或呼吸率升高；睡眠與運動員體質可能較低。單次數字不能取代 PAT、ABCDE 與重複評估。</p></div>
+        <div className="vitals-sources"><span>資料來源：</span><a href="https://rightdecisions.scot.nhs.uk/dgrefhelp-nhs-dumfries-galloway/admissions/paediatric-admissions/" target="_blank" rel="noreferrer">NHS 小兒生命徵象 ↗</a><a href="https://www.who.int/data/gho/indicator-metadata-registry/imr-details/normothermia-on-admission" target="_blank" rel="noreferrer">WHO 新生兒正常體溫 ↗</a></div>
+      </section>
+
       <section className="navigator-section" id="navigator">
-        <div className="navigator-head"><div className="section-label light"><span>02</span><p>DECISION<br />急症導航</p></div><div><p className="micro">FROM FIRST LOOK TO FIRST ACTION</p><h2>從第一眼，<br />走到第一個正確動作。</h2></div><p>這不是診斷工具，而是訓練現場優先順序：辨識生理威脅、先做會改變結果的處置，再反覆評估。</p></div>
+        <div className="navigator-head"><div className="section-label light"><span>03</span><p>DECISION<br />急症導航</p></div><div><p className="micro">FROM FIRST LOOK TO FIRST ACTION</p><h2>從第一眼，<br />走到第一個正確動作。</h2></div><p>這不是診斷工具，而是訓練現場優先順序：辨識生理威脅、先做會改變結果的處置，再反覆評估。</p></div>
         <div className="navigator-body">
           <div className="emergency-list" role="tablist">{(Object.keys(emergencies) as EmergencyKey[]).map((key, index) => <button key={key} className={emergency === key ? "active" : ""} onClick={() => setEmergency(key)}><span>{String(index + 1).padStart(2, "0")}</span>{emergencies[key].label}<i>→</i></button>)}</div>
           <article className="emergency-panel">
@@ -262,6 +377,61 @@ export default function Home() {
             <div className="field-note"><span>FIELD NOTE</span><p>{currentEmergency.note}</p></div>
           </article>
         </div>
+      </section>
+
+      <section className="ohca-section" id="ohca" style={{ "--ohca-accent": activeOhca.accent } as React.CSSProperties}>
+        <div className="ohca-heading">
+          <div className="section-label light"><span>04</span><p>OHCA FIELD FLOW<br />心肺停止流程</p></div>
+          <div><p className="micro">SELECT AGE · FOLLOW STEPS · REASSESS</p><h2>出勤時，<br />照順序走。</h2></div>
+          <p>先選病人所處情境，再依序完成辨識、復甦與重評。每一步都保留返回修正，適合手機或平板現場對照。</p>
+        </div>
+
+        <div className="ohca-scope-alert"><b>先選對流程</b><p><strong>出生當下仍在轉銜期</strong>使用新生兒復甦；已離開出生轉銜情境的嬰兒與兒童 OHCA，使用兒科 BLS／心跳停止流程。</p></div>
+
+        <div className="ohca-tabs" role="tablist" aria-label="選擇心肺停止流程">
+          {(Object.keys(ohcaFlows) as OhcaKey[]).map((key) => <button key={key} className={ohcaPath === key ? "active" : ""} onClick={() => selectOhcaPath(key)} role="tab" aria-selected={ohcaPath === key}><b>{ohcaFlows[key].label}</b><small>{ohcaFlows[key].scope}</small></button>)}
+        </div>
+
+        <div className="ohca-warning"><span>適用範圍</span><p>{activeOhca.warning}</p></div>
+
+        <div className="ohca-workbench">
+          <aside className="ohca-step-list" aria-label="流程步驟">
+            {activeOhca.steps.map((step, index) => <button key={`${step.phase}-${step.title}`} className={index === ohcaStep ? "active" : index < ohcaStep ? "done" : ""} onClick={() => setOhcaStep(index)} aria-current={index === ohcaStep ? "step" : undefined}><span>{index < ohcaStep ? "✓" : String(index + 1).padStart(2, "0")}</span><div><small>{step.phase}</small><b>{step.title}</b></div></button>)}
+          </aside>
+
+          <article className="ohca-current" aria-live="polite">
+            <div className="ohca-progress"><span>STEP {String(ohcaStep + 1).padStart(2, "0")} / {String(activeOhca.steps.length).padStart(2, "0")}</span><b>{ohcaProgress}%</b><i><em style={{ width: `${ohcaProgress}%` }} /></i></div>
+            <p className="ohca-phase">{currentOhcaStep.phase}</p>
+            <h3>{currentOhcaStep.title}</h3>
+            <p className="ohca-detail">{currentOhcaStep.detail}</p>
+            <div className="ohca-action"><span>現在要做</span><div><p>{currentOhcaStep.action}</p>{currentOhcaStep.mnemonic && <small className="ohca-mnemonic"><b>口訣</b>{currentOhcaStep.mnemonic}</small>}</div></div>
+
+            {ohcaPath === "newborn" && <div className="newborn-pulse-panel">
+              <div className="newborn-pulse-title"><span>NEWBORN PULSE CHECK</span><b>新生兒心率／脈動評估位置</b><p>觸診容易低估心率，不可作為出生復甦唯一依據。</p></div>
+              <div className="newborn-pulse-grid">
+                <article><span>01</span><div><b>臍動脈／臍帶根部</b><p>在臍帶靠近腹壁的根部，以食指與中指輕觸搏動；仍連接臍帶時可快速估計心率。</p></div></article>
+                <article><span>02</span><div><b>肱動脈</b><p>手臂微外展，在上臂內側、肱二頭肌與肱三頭肌之間，以兩指輕壓觸診。</p></div></article>
+                <article className="preferred"><span>✓</span><div><b>確認方式：心前區聽診／ECG</b><p>出生轉銜初評以心前區聽診；需要復甦時儘早使用 ECG。進行胸部按壓時應以 ECG 快速、連續評估心率。</p></div></article>
+              </div>
+            </div>}
+
+            {ohcaPath !== "newborn" && ohcaStep === 4 && <div className="rhythm-panel">
+              <div className="rhythm-title"><b>選擇節律</b><span>每次節律分析後重新選擇</span></div>
+              <div className="rhythm-buttons">{(Object.keys(rhythmBranches) as RhythmKey[]).map((key) => <button key={key} className={ohcaRhythm === key ? "active" : ""} onClick={() => setOhcaRhythm(key)}><b>{rhythmBranches[key].label}</b><small>{rhythmBranches[key].subtitle}</small></button>)}</div>
+              {ohcaRhythm && <div className="rhythm-cycles">{rhythmBranches[ohcaRhythm].cycles.map((cycle, index) => <div key={cycle.title}><span>{index + 1}</span><p><b>{cycle.title}</b><small>{cycle.detail}</small></p></div>)}</div>}
+            </div>}
+
+            <div className="ohca-controls">
+              <button disabled={ohcaStep === 0} onClick={() => setOhcaStep((step) => Math.max(0, step - 1))}>← 上一步</button>
+              <button className="reset" onClick={() => { setOhcaStep(0); setOhcaRhythm(null); }}>重新開始</button>
+              <button className="next" disabled={ohcaStep === 4 && ohcaPath !== "newborn" && !ohcaRhythm} onClick={() => setOhcaStep((step) => Math.min(activeOhca.steps.length - 1, step + 1))}>{ohcaStep === activeOhca.steps.length - 1 ? "流程完成 ✓" : "完成並下一步 →"}</button>
+            </div>
+          </article>
+        </div>
+
+        <div className="ohca-field-strip"><div><b>2 min</b><span>CPR 循環後分析節律</span></div><div><b>3–5 min</b><span>Epinephrine 重複間隔</span></div><div><b>VENTILATE</b><span>避免過度換氣，確認胸廓起伏</span></div><div><b>LOCAL SOP</b><span>地方流程與醫療指導優先</span></div></div>
+        <p className="ohca-disclaimer">此工具供訓練與現場認知輔助，不取代合格訓練、醫療指導、核准器材標示與所屬機關 SOP。</p>
+        <div className="ohca-sources"><span>2025 AHA 參考：</span><a href="https://cpr.heart.org/-/media/CPR-Files/CPR-Guidelines-Files/2025-Algorithms/Algorithm-PALS-CA-250123.pdf" target="_blank" rel="noreferrer">兒科心跳停止流程 ↗</a><a href="https://cpr.heart.org/-/media/CPR-Files/CPR-Guidelines-Files/2025-Algorithms/1-2-Algorithm-Neonatal-Resuscitation-250129.pdf?sc_lang=en" target="_blank" rel="noreferrer">新生兒復甦流程 ↗</a></div>
       </section>
 
       <section className="pat-section">
@@ -273,7 +443,7 @@ export default function Home() {
       </section>
 
       <section className="skills-section" id="skills">
-        <div className="skills-head"><div className="section-label"><span>03</span><p>SKILL LAB<br />技術教室</p></div><div><p className="micro">ACTION + VERBALIZATION + REASSESSMENT</p><h2>把技術拆到<br />每一步都能被檢核。</h2></div><div className="skill-progress"><b>{percent}%</b><span>已完成 {completed.length} / {skills.length} 項</span><i><em style={{ width: `${percent}%` }} /></i></div></div>
+        <div className="skills-head"><div className="section-label"><span>05</span><p>SKILL LAB<br />技術教室</p></div><div><p className="micro">ACTION + VERBALIZATION + REASSESSMENT</p><h2>把技術拆到<br />每一步都能被檢核。</h2></div><div className="skill-progress"><b>{percent}%</b><span>已完成 {completed.length} / {skills.length} 項</span><i><em style={{ width: `${percent}%` }} /></i></div></div>
         <div className="skill-workbench">
           <div className="skill-index">{skills.map((item, index) => <button key={item.id} className={skill === item.id ? "active" : ""} onClick={() => setSkill(item.id)}><span>{String(index + 1).padStart(2, "0")}</span><div><small>{item.group}</small><b>{item.title}</b></div>{completed.includes(item.id) && <i>✓</i>}</button>)}</div>
           <article className="skill-detail">
@@ -286,7 +456,7 @@ export default function Home() {
 
       <section className="ruler-section" id="ruler" style={{ "--zone": activeZone.color, "--zone-ink": activeZone.ink } as React.CSSProperties}>
         <div className="ruler-heading">
-          <div className="section-label"><span>04</span><p>PEDIATRIC TAPE<br />互動小兒尺</p></div>
+          <div className="section-label"><span>06</span><p>PEDIATRIC TAPE<br />互動小兒尺</p></div>
           <div><p className="micro">MEASURE · PREPARE · CROSS-CHECK</p><h2>少背公式，<br />多一次安全複核。</h2></div>
           <p>先使用實測體重；無法取得時，身長色帶只能作為初始估算。結果用於教學演練，臨床仍須依核准工具、設備標示、醫療指導與地方 SOP。</p>
         </div>
@@ -336,7 +506,7 @@ export default function Home() {
       </section>
 
       <section className="teaching-section" id="teaching">
-        <div className="teaching-title"><div className="section-label light"><span>05</span><p>TEACHING<br />情境教學</p></div><div><p className="micro">PAUSE · DECIDE · DEBRIEF</p><h2>不要只問「會不會」，<br />要看他何時做出決定。</h2></div></div>
+        <div className="teaching-title"><div className="section-label light"><span>07</span><p>TEACHING<br />情境教學</p></div><div><p className="micro">PAUSE · DECIDE · DEBRIEF</p><h2>不要只問「會不會」，<br />要看他何時做出決定。</h2></div></div>
         <div className="case-grid">{cases.map((item) => <article className={caseOpen === item.no ? "case open" : "case"} key={item.no}>
           <button onClick={() => setCaseOpen(caseOpen === item.no ? null : item.no)} aria-expanded={caseOpen === item.no}><span className="case-no">CASE {item.no}</span><small>{item.age}</small><h3>{item.title}</h3><p>{item.vital}</p><b>{item.prompt}</b><i>{caseOpen === item.no ? "收起" : "揭曉"} →</i></button>
           {caseOpen === item.no && <div className="answer"><span>教官重點</span><p>{item.answer}</p></div>}
