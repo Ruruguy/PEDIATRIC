@@ -4,6 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 
 type AgeKey = "newborn" | "infant" | "child";
 type EmergencyKey = "breathing" | "arrest" | "choking" | "seizure" | "shock" | "trauma";
+type QuickFlowTopic = "ohca" | "choking";
+type QuickFlowAge = "newborn" | "infant" | "child";
+type PathologyKey = "upper-airway" | "lower-airway" | "shock" | "anaphylaxis" | "seizure" | "dka";
 type ApgarKey = "appearance" | "pulse" | "grimace" | "activity" | "respiration";
 type ApgarTime = 1 | 5 | 10 | 15 | 20;
 type ApgarScores = Record<ApgarKey, number | null>;
@@ -144,6 +147,66 @@ const emergencies: Record<EmergencyKey, { label: string; cue: string; steps: { t
 
 type Skill = { id: string; group: string; title: string; lead: string; mnemonic: string; steps: string[]; success: string; pitfalls: string[] };
 
+function ImLandmarkVisual() {
+  return (
+    <section className="procedure-visual" aria-labelledby="im-landmark-title">
+      <div className="procedure-visual-head"><span>LANDMARK / 定位圖</span><h4 id="im-landmark-title">先找骨性標誌，再確認肌肉厚度</h4></div>
+      <div className="procedure-visual-grid">
+        <figure className="landmark-card">
+          <svg viewBox="0 0 320 240" role="img" aria-label="嬰幼兒大腿前外側中段股外側肌定位示意">
+            <path className="body-fill" d="M119 26c-18 13-27 32-24 55l12 94c3 25 19 40 42 40s39-15 42-40l12-94c3-23-6-42-24-55-18 9-42 9-60 0Z" />
+            <path className="bone-line" d="M149 43v151M112 84h74M105 166h88" />
+            <path className="target-fill" d="M166 89c18 8 27 23 24 42-2 18-12 29-29 35l-7-38 12-39Z" />
+            <path className="guide-line" d="M218 89h54M218 166h54M245 89v77" />
+            <text x="244" y="82" textAnchor="middle">上 1/3</text><text x="244" y="132" textAnchor="middle" className="guide-em">中 1/3</text><text x="244" y="181" textAnchor="middle">下 1/3</text>
+          </svg>
+          <figcaption><b>新生兒、嬰兒與 1–2 歲</b><span>股外側肌｜大腿前外側的中間三分之一</span></figcaption>
+        </figure>
+        <figure className="landmark-card">
+          <svg viewBox="0 0 320 240" role="img" aria-label="三歲以上兒童肩峰下方三角肌中央定位示意">
+            <path className="body-fill" d="M61 75c31-35 68-52 113-50 35 2 59 16 78 40l-32 37-13 112h-92l-11-112L61 75Z" />
+            <path className="bone-line" d="M94 78c47-20 94-20 141 0M115 174h92" />
+            <path className="target-fill" d="M123 91h79l-39 63-40-63Z" />
+            <path className="guide-line" d="M226 78h54M226 174h54" />
+            <text x="250" y="69" textAnchor="middle">肩峰</text><text x="249" y="190" textAnchor="middle">腋窩皺褶水平</text>
+          </svg>
+          <figcaption><b>3 歲以上且肌肉量足夠</b><span>三角肌｜肩峰下方倒三角形的肌腹中央</span></figcaption>
+        </figure>
+      </div>
+      <div className="procedure-visual-note"><b>安全界線</b><p>新生兒避免三角肌；小兒不常規使用背臀區。圖片只供定位複習，實際仍須觸診、核對藥物仿單與地方 SOP。</p></div>
+      <div className="procedure-visual-source"><span>交叉核對｜PHPLS 教材</span><a href="https://www.cdc.gov/vaccines/hcp/imz-best-practices/vaccine-administration.html" target="_blank" rel="noreferrer">CDC Vaccine Administration ↗</a></div>
+    </section>
+  );
+}
+
+function RectalMedicationVisual() {
+  return (
+    <section className="procedure-visual rectal-visual" aria-labelledby="rectal-visual-title">
+      <div className="procedure-visual-head"><span>POSITION / 劑型辨識</span><h4 id="rectal-visual-title">保護隱私、左側臥、依處方核藥</h4></div>
+      <div className="procedure-visual-grid">
+        <figure className="landmark-card">
+          <svg viewBox="0 0 320 240" role="img" aria-label="兒童穿著衣物採左側臥，上側腿屈曲、下側腿伸直的姿勢示意">
+            <path className="bed-line" d="M31 197h258" />
+            <circle className="body-fill" cx="67" cy="105" r="28" />
+            <path className="body-stroke" d="M92 112c41 12 76 30 102 48M101 126c35 7 72 8 108 4M194 160l55-25M194 160l42 34M209 130l70 1M236 194l43 1" />
+            <path className="target-stroke" d="M178 145c12-2 23 1 31 9" />
+          </svg>
+          <figcaption><b>一歲以上常用姿勢</b><span>左側臥；上側腿屈曲、下側腿伸直，兼顧觀察與隱私</span></figcaption>
+        </figure>
+        <figure className="landmark-card dose-form-card">
+          <svg viewBox="0 0 320 240" role="img" aria-label="肛門栓劑為處方藥物劑型的簡化示意">
+            <path className="suppository" d="M159 40c27 30 50 65 50 97 0 37-20 63-50 63s-50-26-50-63c0-32 23-67 50-97Z" />
+            <path className="dose-check" d="m135 137 17 17 34-42" />
+          </svg>
+          <figcaption><b>先辨識劑型與完整性</b><span>確認藥名、含量、適應症、禁忌及處方；是否分割依產品說明與 SOP</span></figcaption>
+        </figure>
+      </div>
+      <div className="procedure-visual-note"><b>不是自行用藥圖</b><p>Diclofenac 栓劑為處方藥；肛門疾患、直腸炎或直腸出血等情況禁用。置入遇阻、疼痛或出血應停止。</p></div>
+      <div className="procedure-visual-source"><span>交叉核對｜PHPLS 教材</span><a href="https://www.fda.gov.tw/tc/includes/GetFile.ashx?id=f636694231199735860" target="_blank" rel="noreferrer">TFDA Diclofenac 栓劑仿單 ↗</a></div>
+    </section>
+  );
+}
+
 const skills: Skill[] = [
   { id: "pat", group: "評估", title: "60 秒 PAT", lead: "不碰孩子，先看出危急。", mnemonic: "看、聽、合｜看外觀・聽呼吸・合併皮膚循環", steps: ["先看外觀：肌張力、互動、安撫性、凝視、哭聲／語言", "再看呼吸作功：姿勢、胸凹、鼻翼搧動與異常呼吸音", "看皮膚循環：蒼白、發紺與大理石斑", "整合生理臆斷：穩定、呼吸窘迫／衰竭、休克、中樞異常或心肺衰竭", "接續 ABCDE；創傷則從 XABCDE 開始，並持續重評"], success: "60 秒內說出生理威脅與第一優先處置。", pitfalls: ["先碰孩子、先量血壓而錯過第一眼", "把 PAT 當完整評估，沒有接續 ABCDE"] },
   { id: "bvm", group: "氣道", title: "兒科 BVM 通氣", lead: "面罩密合、胸廓起伏、心率上升。", mnemonic: "罩、擺、扣、擠、看｜無效再做：擺、吸、漏、壓", steps: ["選面罩：只覆蓋鼻口，不壓眼睛、不超過下巴", "擺位：維持中立／嗅聞姿勢；嬰幼兒依體型在肩背下墊高", "密合：EC 扣罩；兩人法由一人雙手密合、一人擠壓", "每口約 1 秒，僅擠到看見胸廓起伏，避免過快或過量；設備可監測時，潮氣量參考為新生兒 4–6 mL/kg、嬰兒與兒童 6–8 mL/kg", "胸廓不起伏：依『擺、吸、漏、壓』重新擺位、必要時抽吸、檢查漏氣、逐步調壓；完整 MRSOPA 還包括張口與替代氣道，每做一項就重看胸廓與心率"], success: "胸廓可見起伏、心率上升，且沒有明顯漏氣或胃部過度膨脹。", pitfalls: ["面罩壓眼或超過下巴", "只加大壓力，沒有先修正擺位與密合"] },
@@ -151,10 +214,10 @@ const skills: Skill[] = [
   { id: "choking", group: "復甦", title: "小兒異物梗塞", lead: "先分有效咳嗽與嚴重梗塞；看不見就不盲挖。", mnemonic: "咳、五背、五推、倒、壓、看", steps: ["咳：仍能有效咳嗽、發聲或哭泣，鼓勵咳嗽並持續觀察", "嚴重梗塞且有反應：嬰兒反覆 5 背擊＋5 胸推；兒童反覆 5 背擊＋5 腹部衝擊", "倒：失去反應時安全置於堅硬平面，呼救並啟動 CPR", "壓：從胸外按壓開始；每次開放氣道準備通氣時檢查口腔", "看：只移除清楚看得到的異物；解除後重評呼吸、殘留異物與氣道損傷"], success: "能正確依年齡選擇推擊位置，失去反應後無延誤開始 CPR，且不盲目挖取。", pitfalls: ["對嬰兒做腹部衝擊", "孩子仍能有效咳嗽時急著拍打，或看不到異物仍伸手盲挖"] },
   { id: "newborn-ppv", group: "新生兒", title: "新生兒初步處置與 PPV", lead: "先把肺打開；心率上升是最佳成效指標。", mnemonic: "初步：擦、暖、激、擺｜校正：擺、吸、漏、壓", steps: ["出生前團隊簡報、保暖並完成通氣、必要抽吸、監測與進階器材檢查；無需立即復甦者延遲夾臍至少 60 秒", "快速問：足月？肌張力良好？有呼吸或哭聲？任一否即做初步處置", "擦乾、保暖、刺激與擺位；即使胎便污染也不常規抽吸，只有氣道疑似阻塞才處理", "呼吸暫停／喘息或 HR＜100：黃金一分鐘內開始 PPV，30–60 次／分、每次充氣 0.5–1 秒；接右手／手腕血氧並考慮 ECG", "胸廓不起伏或心率不升：做通氣校正；有效通氣 30 秒後 HR＜60 才進入 3:1 按壓"], success: "胸廓起伏且心率上升；依心率 ≥100、60–99、＜60 正確分流。", pitfalls: ["把例行抽吸當成每位新生兒必做", "尚未建立至少 30 秒有效通氣就急著按壓或給藥"] },
   { id: "io", group: "通路", title: "骨內針 IO", lead: "選點準、落空停、抽沖看腫。", mnemonic: "選、找、排、固、九、線、落、抽、沖、腫、固、記", steps: ["選針與選點：依軟組織深度選長度；優先依 SOP 選近端脛骨等核准部位", "找骨標、消毒、預充延長管並固定肢體；操作手不可放在針尖後方", "90 度進針；確認皮外仍看得到至少 5 mm 標線後才啟動鑽針", "感到阻力突然降低即停止，移除針芯並立刻投入利器盒", "確認穩定、回抽；以 2–5 mL 生理食鹽水沖管並看有無腫脹，最後固定、記時、持續監測"], success: "針體穩定、沖注順暢，周圍沒有滲漏或腫脹。", pitfalls: ["未見 5 mm 標線仍進針，可能針長不足", "只靠是否抽到骨髓判斷成功，沒有沖管與觀察腫脹"] },
-  { id: "im", group: "給藥", title: "兒科 IM 注射", lead: "先核對與定位，再談進針；心停與嚴重休克不走 IM。", mnemonic: "五對、備抽、定位、消毒、九十、注錄", steps: ["五對：病人、藥物、劑量、途徑、時間；再核對體重、濃度、總量與 mL", "適應症：IM 可用於過敏 Epinephrine、癲癇 Midazolam 等核准情境；心跳停止或嚴重休克因周邊灌流差，不建議用 IM 給急救藥", "定位：新生兒／嬰兒與 1–3 歲優先股外側肌；3 歲以上依肌肉量與藥量評估三角肌、股外側肌或腹臀區，避免背臀區", "針具：PHPLS 教材列 22–25G；嬰幼兒常用約 25 mm，較大兒童依部位、肌肉與皮下厚度個別選 16–32 mm", "無菌備抽、消毒待乾，以 90 度快速進針；平穩注入、拔針處理針具，紀錄部位、時間、藥物、劑量與反應"], success: "劑量與 mL 計算正確、部位定位安全、全程無菌且完成紀錄監測。", pitfalls: ["在心停或嚴重休克仍選 IM，忽略吸收不可靠", "把年齡固定綁定單一針具，或使用背臀肌區造成神經與血管風險"] },
-  { id: "inhaled-meds", group: "給藥", title: "呼吸藥物｜Wheezing vs Croup", lead: "先辨呼吸音，再選藥物與途徑；兩條路徑不可混用。", mnemonic: "辨、核、給、流、評", steps: ["辨：Wheezing／哮鳴多指向下呼吸道；Croup／哮吼常見吸氣性 stridor，先評估是否呼吸衰竭", "WHEEZING：協助核准的病童自備 MDI／DPI，每次 2 噴、每噴間隔 1 分鐘；運送超過 20 分鐘可依流程每 20 分鐘再給", "WHEEZING：IH A＋B／單 B，未滿 5 歲約半支並以 N/S 稀釋至 4 mL；氧氣 6 L/min 霧化，避免接潮氣瓶影響效率", "嚴重 WHEEZING：PHPLS 教材列聯絡醫療指導後考慮 Epinephrine 0.3–0.5 mg SC、角度 10–30°；心臟病、高血壓、心律不整或 HR≥150／分為禁忌", "CROUP：IH Epinephrine 0.5 mg/kg、不稀釋；PHPLS 教材列＜4 歲上限 2.5 mg、＞4 歲上限 5 mg，4 歲整依 SOP／醫療指導", "評：每次後重看呼吸作功、呼吸音、意識、心率與 SpO₂；準備處理疲乏、安靜胸或通氣不足"], success: "能先說出 WHEEZING 或 CROUP，再正確核對藥物、途徑、上限與給藥後反應。", pitfalls: ["把嚴重過敏的 IM、嚴重 wheezing 的 SC 與哮吼的 IH Epinephrine 混為一談", "未滿 1 歲、心肌梗塞病史或明顯心衰竭呼吸窘迫仍未核對 A＋B／單 B 禁忌"] },
+  { id: "im", group: "給藥", title: "兒科 IM 注射", lead: "先核對與定位，再談進針；心停與嚴重休克不走 IM。", mnemonic: "五對、備抽、定位、消毒、九十、注錄", steps: ["五對：病人、藥物、劑量、途徑、時間；再核對體重、濃度、總量與 mL", "適應症：IM 可用於過敏 Epinephrine、癲癇 Midazolam 等核准情境；心跳停止或嚴重休克因周邊灌流差，不建議用 IM 給急救藥", "定位：新生兒、嬰兒與 1–2 歲優先股外側肌；3 歲以上若肌肉量足夠，三角肌優先，股外側肌可替代；避免背臀區", "針具：CDC 疫苗注射指引列 22–25G；長度依年齡、部位、肌肉量、皮下厚度、藥物與技術個別選擇，並以藥物仿單及地方 SOP 為準", "無菌備抽、消毒待乾，以 90 度快速進針；平穩注入、拔針處理針具，紀錄部位、時間、藥物、劑量與反應"], success: "劑量與 mL 計算正確、部位定位安全、全程無菌且完成紀錄監測。", pitfalls: ["在心停或嚴重休克仍選 IM，忽略吸收不可靠", "把年齡固定綁定單一針具，或使用背臀肌區造成神經與血管風險"] },
+  { id: "inhaled-meds", group: "給藥", title: "呼吸藥物｜Wheezing vs Croup", lead: "先辨呼吸音，再選藥物與途徑；兩條路徑不可混用。", mnemonic: "辨、核、給、流、評", steps: ["辨：Wheezing／哮鳴多指向下呼吸道；Croup／哮吼常見吸氣性 stridor，先評估是否呼吸衰竭", "WHEEZING：協助核准的病童核准自備 MDI，每次 2 噴、每噴間隔 1 分鐘；運送超過 20 分鐘可依流程每 20 分鐘再給", "WHEEZING：霧化藥先核對成分、濃度、每支容量及處方 mg，再換算 mL；教材「半支」僅限指定製劑，未確認規格不執行。DPI 依製劑吸入，不套用 MDI 噴霧操作", "嚴重 WHEEZING：PHPLS 教材列聯絡醫療指導後考慮 Epinephrine 0.3–0.5 mg SC、角度 10–30°；心臟病、高血壓、心律不整或 HR≥150／分為禁忌", "CROUP：IH Epinephrine 0.5 mg/kg、不稀釋；PHPLS 教材列＜4 歲上限 2.5 mg、＞4 歲上限 5 mg，4 歲整依 SOP／醫療指導", "評：每次後重看呼吸作功、呼吸音、意識、心率與 SpO₂；準備處理疲乏、安靜胸或通氣不足"], success: "能先說出 WHEEZING 或 CROUP，再正確核對藥物、途徑、上限與給藥後反應。", pitfalls: ["把嚴重過敏的 IM、嚴重 wheezing 的 SC 與哮吼的 IH Epinephrine 混為一談", "未滿 1 歲、心肌梗塞病史或明顯心衰竭呼吸窘迫仍未核對 A＋B／單 B 禁忌"] },
   { id: "hypoglycemia", group: "給藥", title: "低血糖｜PHPLS 年齡分段", lead: "先確認血糖與吞嚥，只顯示目前年齡對應方案。", mnemonic: "測、吞、選、給、再測", steps: ["測：意識改變、抽搐或灌流不良應立即量血糖；PHPLS 教材以血糖＜60 mg/dL 為警戒，未滿 1 歲嬰兒標示＜45 mg/dL", "吞：清醒且可安全吞嚥者依 SOP 優先口服葡萄糖；意識不清、抽搐或吞嚥不安全者不可強行口服", "選：依實際年齡選目前一列，不把不同濃度累加；新生兒＜28 日為新版例外 D10W 2 mL/kg（0.2 g/kg）", "給：PHPLS 表列嬰兒＜1 歲 D10W 5 mL/kg、1–3 歲 D25W 2 mL/kg、青少年／已有第二性徵 D50W 1 mL/kg；4 歲至青春期前未在該頁獨立列示，不自行外推", "再測：給藥後 5–10 分鐘重測血糖與意識，持續低血糖依 SOP 重複或接續輸注，並找出藥物、禁食、感染、代謝或內分泌原因"], success: "血糖與神經狀態改善，且完成重測、原因評估、持續監測與後送。", pitfalls: ["把各年齡列出的不同濃度全部給完；每次只使用目前年齡對應方案", "忽略高濃度葡萄糖的高滲透壓、外滲與靜脈傷害風險", "把＜28 日新生兒 D10W 2 mL/kg 誤寫回舊版 D5W 10 mL/kg"] },
-  { id: "rectal", group: "給藥", title: "肛門給藥", lead: "先顧隱私，再擺位、置入與留藥。", mnemonic: "核、解、擺、潤、塞、夾、看", steps: ["核：核對適應症、藥物、劑型、體重、劑量與禁忌；若單次小於一顆，打開包裝前先用乾淨剪刀裁去多餘部分", "解：向照顧者與孩子說明，維護隱私、戴手套並檢查肛門周圍", "擺：兒童採左側臥並提起臀部；新生兒或小嬰兒可仰臥抬高雙腿，無法側臥且躁動時依情況採俯臥", "潤、塞：潤滑後讓塞劑尖端朝內，輕柔推入並通過括約肌，不可強推", "夾、看：塞劑完全進入後輕夾雙臀約 10–15 秒，觀察是否排出、療效與不良反應並紀錄"], success: "藥物未立即排出、沒有出血或黏膜損傷，且完成療效與副作用評估。", pitfalls: ["未說明或未遮蔽，忽略兒童隱私與心理壓力", "強行置入或用手指深推藥物"] },
+  { id: "rectal", group: "給藥", title: "肛門給藥", lead: "先顧隱私，再擺位、置入與留藥。", mnemonic: "核、解、擺、潤、塞、夾、看", steps: ["核：核對適應症、藥物、劑型、體重、處方劑量與禁忌；需要少於完整一顆時，不自行假設可切割，先依產品說明、地方 SOP 或醫療指導確認", "解：向照顧者與孩子說明，維護隱私、戴手套並檢查肛門周圍；肛門疾患、直腸炎、直腸出血等依 diclofenac 仿單禁用", "擺：一歲以上兒童常採左側臥，上側腿屈曲、下側腿伸直；小嬰兒姿勢依訓練與 SOP，持續保暖並避免過度暴露", "潤、塞：潤滑後依產品說明確認置入方向，輕柔置入並通過括約肌；遇阻、明顯疼痛或出血立即停止，不可強推", "夾、看：塞劑完全進入後輕夾雙臀約 10–15 秒，觀察是否排出、療效與不良反應並紀錄"], success: "藥物未立即排出、沒有出血或黏膜損傷，且完成療效與副作用評估。", pitfalls: ["未說明或未遮蔽，忽略兒童隱私與心理壓力", "未核對仿單就切割、強行置入或用手指深推藥物"] },
   { id: "trauma-xabcde", group: "創傷", title: "小兒創傷 XABCDE", lead: "先止住會死人的出血，再維持氣道、通氣、灌流與保暖。", mnemonic: "止、道、呼、循、神、露暖", steps: ["X 止血：直接加壓優先；快速評估出血量與止血成效，避免因孩子體型小而低估", "A 氣道：依頭大、枕部突出的特性用肩背墊維持中立位置；只在需要時抽吸，避免盲目手指挖取", "B 呼吸：觀察胸廓與呼吸作功，避免過度通氣；疑張力性氣胸且具資格時，C-TECC 2025 優先第 5 肋間前腋線、第 2 肋間鎖骨中線為替代，仍依地方 SOP", "C 循環：脈搏、CRT、皮膚與意識一起看；疑出血性休克優先止血與血品，避免固定反覆晶質液", "D／E：AVPU／GCS、瞳孔、肌張力與血糖；以 TEN-4-FACESp 檢視高風險瘀傷，暴露後立即保暖並以 IMIST 交班"], success: "能在一分鐘內指出最先致命問題、完成止血與中立擺位，並用重評結果證明處置有效。", pitfalls: ["等血壓下降才承認休克；兒童低血壓常是晚期", "把 TEN-4-FACESp 當診斷，或忽略依地方規定紀錄與通報"] },
   { id: "trm", group: "團隊", title: "院前 TRM 與封閉迴路", lead: "角色清楚、指令複誦、執行回報，才能減少 CPR 中斷。", mnemonic: "指、覆、做、報、再總結", steps: ["Leader 指派：壓胸、氣道、IV／IO 與藥物、監測／去顫；人力不足時先保住壓胸與去顫", "指令要說清楚對象、任務、劑量／時間與完成標準", "接受者覆誦，執行後主動回報；看到壓胸品質下降、漏藥或中斷過久要立即建設性提醒", "Leader 定期重新評估並歸納：目前節律、最近一次藥物／電擊、下一步與可逆原因", "每次事件後 debrief：找出卡點、中斷原因與下次可練的具體行為"], success: "每個任務都有姓名、覆誦與完成回報，Leader 能隨時說出目前狀態與下一步。", pitfalls: ["多人同時下令或都擠在同一任務，卻沒有人管時間與壓胸品質", "成員看見問題但因年資或角色沒有說出口"] },
   { id: "tape", group: "器材", title: "體重估算｜身長尺＋Best Guess", lead: "實測優先；身長尺不可用時，年齡公式才是備援。", mnemonic: "實、問、尺、猜、核", steps: ["實：能安全量測時使用公斤制實測體重，不用估算值取代", "問：無法立即秤重時，先詢問照顧者近期可靠體重並確認單位", "尺：不知道體重時優先使用核准的身長／體型估重工具，仰躺由頭頂量至足跟", "猜：仍無法取得時才用 Best Guess——1–11 個月：（月齡＋9）÷2；1–4 歲：2×（足歲＋5）；5–14 歲：4×足歲，結果單位為 kg", "核：口頭標示『估算體重』，由第二人複算；藥物濃度、劑量上限、器材標示與地方 SOP 再確認並持續尋找實際體重"], success: "清楚說明體重來源與估算方法，計算一致，所有藥物和器材選擇均完成第二人複核。", pitfalls: ["有實測或照顧者可靠體重仍套用年齡公式", "把月齡當足歲或選錯公式分段", "忽略體型、營養狀態與族群差異；Best Guess 可能高估或低估"] },
@@ -222,6 +285,81 @@ const lmaSizeFor = (weight: number) => {
   return "3";
 };
 
+const quickFlowAges: Record<QuickFlowAge, { label: string; scope: string }> = {
+  newborn: { label: "出生時新生兒", scope: "出生轉銜／產房流程" },
+  infant: { label: "嬰兒", scope: "出生滿 1 個月至未滿 1 歲" },
+  child: { label: "兒童", scope: "1 歲至青春期" },
+};
+
+const pediatricQuickFlows: Record<QuickFlowTopic, Record<QuickFlowAge, {
+  title: string;
+  scope: string;
+  start: string;
+  decision: string;
+  yes: { label: string; steps: string[] };
+  no: { label: string; steps: string[] };
+  footer: string;
+}>> = {
+  ohca: {
+    newborn: {
+      title: "出生當下新生兒復甦",
+      scope: "僅適用出生後仍在胎外轉銜的復甦；不是一般嬰兒 OHCA 流程。",
+      start: "出生後立即保暖，判斷：足月？肌張力好？有呼吸或哭聲？",
+      decision: "三項是否全部為「是」？",
+      yes: { label: "是｜常規照護", steps: ["肌膚接觸、保暖並維持正常體溫", "持續評估呼吸、活動與膚色"] },
+      no: { label: "否｜進入復甦", steps: ["保暖、擦乾、擺位、刺激；只在需要時清理氣道", "呼吸暫停／喘息或 HR＜100：黃金一分鐘內開始 PPV", "有效 PPV 30 秒後 HR＜60：3:1 按壓＋通氣、100% 氧與進階氣道", "約 60 秒後仍 HR＜60：Epinephrine、考慮低血容量與氣胸"] },
+      footer: "有效通氣是新生兒復甦最重要的動作；不可直接套用一般 30:2／15:2 OHCA 流程。",
+    },
+    infant: {
+      title: "嬰兒 OHCA",
+      scope: "出生滿 1 個月至未滿 1 歲；新生兒離開出生轉銜後發生心停，也依臨床情境與地方 SOP 轉入兒科流程。",
+      start: "無反應＋無正常呼吸／只有瀕死喘息；呼救、啟動支援並取得 AED。",
+      decision: "醫療人員 10 秒內能否明確摸到脈搏？",
+      yes: { label: "有脈搏", steps: ["HR≥60：若呼吸不足，每 2–3 秒給 1 次呼吸", "HR＜60 且灌流不良：先氧合與通氣；仍無改善即開始 CPR", "每 2 分鐘重新檢查脈搏"] },
+      no: { label: "無脈搏／不確定", steps: ["立即 CPR：100–120 次／分，深度約 4 cm", "單人 30:2；雙人 15:2；單手掌根或雙拇指環抱", "接上 AED／監視器；每 2 分鐘分析節律並依 PALS 分支", "可電擊 VF／pVT；不可電擊 PEA／Asystole，持續找可逆原因"] },
+      footer: "兒科心停多與缺氧相關，按壓與有效通氣同等重要；避免只做 hands-only CPR。",
+    },
+    child: {
+      title: "兒童 OHCA",
+      scope: "1 歲至青春期；青春期後 BLS 改依成人規範；PALS 適用至18歲，高級處置依地方 SOP。",
+      start: "無反應＋無正常呼吸／只有瀕死喘息；呼救、啟動支援並取得 AED。",
+      decision: "醫療人員 10 秒內能否明確摸到頸／股動脈？",
+      yes: { label: "有脈搏", steps: ["HR≥60：若呼吸不足，每 2–3 秒給 1 次呼吸", "HR＜60 且灌流不良：先氧合與通氣；仍無改善即開始 CPR", "每 2 分鐘重新檢查脈搏"] },
+      no: { label: "無脈搏／不確定", steps: ["立即 CPR：100–120 次／分，深度約 5 cm", "依體型單手或雙手；單人 30:2、雙人 15:2", "接上 AED／監視器；每 2 分鐘分析節律並依 PALS 分支", "可電擊 VF／pVT；不可電擊 PEA／Asystole，持續找可逆原因"] },
+      footer: "按壓完整回彈、中斷少於 10 秒；每口氣約 1 秒，只給到可見胸廓起伏。",
+    },
+  },
+  choking: {
+    newborn: {
+      title: "新生兒：先分辨出生轉銜或一般異物梗塞",
+      scope: "出生當下呼吸不佳不等於異物梗塞；離開出生情境後若因餵食或異物突然阻塞，改選「嬰兒」。",
+      start: "出生當下無呼吸／喘息／HR＜100：依新生兒復甦流程先建立有效通氣。",
+      decision: "是否有明確氣道阻塞或通氣時胸廓不起伏？",
+      yes: { label: "疑似阻塞", steps: ["重新擺位並確認面罩密合與通氣壓力", "只有氣道看得到阻塞或分泌物妨礙通氣時才抽吸／移除", "完成通氣矯正並考慮進階氣道"] },
+      no: { label: "無明確阻塞", steps: ["不要常規深部抽吸", "持續 PPV，以胸廓起伏與心率上升確認有效", "依心率進入後續新生兒復甦分支"] },
+      footer: "若是出生後餵食、玩具等造成的突然梗塞，這已是一般嬰兒 FBAO，請切換嬰兒流程。",
+    },
+    infant: {
+      title: "嬰兒異物梗塞",
+      scope: "未滿 1 歲；不可使用腹部衝擊。",
+      start: "突然咳嗽、無法哭／發聲、呼吸聲消失或發紺，先判斷咳嗽是否有效。",
+      decision: "仍能有效咳嗽或哭出聲嗎？",
+      yes: { label: "有效咳嗽", steps: ["鼓勵自行咳嗽並密切觀察", "不要拍打、不要盲目伸手挖取", "惡化為無效咳嗽時立即轉入嚴重梗塞流程"] },
+      no: { label: "嚴重梗塞", steps: ["有反應：反覆 5 次背擊＋5 次胸推", "異物排出或失去反應前持續交替；不可腹部衝擊", "失去反應：安全置地並直接從胸外按壓開始 CPR", "每次開放氣道準備通氣時，只移除看得見的異物，再嘗試 2 次通氣"] },
+      footer: "失去反應後不先給甦醒球兩口氣、不先摸脈搏；從胸外按壓開始，禁止盲目手指清除。",
+    },
+    child: {
+      title: "兒童異物梗塞",
+      scope: "1 歲至青春期；青春期後依成人 FBAO 流程。",
+      start: "突然咳嗽、無法說話／發聲、呼吸聲消失或發紺，先判斷咳嗽是否有效。",
+      decision: "仍能有效咳嗽或說出聲音嗎？",
+      yes: { label: "有效咳嗽", steps: ["鼓勵自行咳嗽並密切觀察", "不要拍打、不要盲目伸手挖取", "惡化為無效咳嗽時立即轉入嚴重梗塞流程"] },
+      no: { label: "嚴重梗塞", steps: ["有反應：反覆 5 次背擊＋5 次腹部衝擊", "異物排出或失去反應前持續交替", "失去反應：安全置地並直接從胸外按壓開始 CPR", "每次開放氣道準備通氣時，只移除看得見的異物，再嘗試 2 次通氣"] },
+      footer: "失去反應後不先給甦醒球兩口氣、不先摸脈搏；從胸外按壓開始，禁止盲目手指清除。",
+    },
+  },
+};
+
 const ohcaFlows: Record<OhcaKey, { label: string; scope: string; warning: string; accent: string; steps: { phase: string; title: string; detail: string; action: string; mnemonic?: string }[] }> = {
   newborn: {
     label: "出生時新生兒復甦",
@@ -254,7 +392,7 @@ const ohcaFlows: Record<OhcaKey, { label: string; scope: string; warning: string
   child: {
     label: "兒童 OHCA",
     scope: "一歲至青春期",
-    warning: "青春期後依成人流程。年齡不確定時，以是否出現青春期徵象及地方 SOP 決定流程。",
+    warning: "BLS 以青春期分界；AHA 2025 PALS 適用至18歲。高級處置與用藥依本系統兒科／成人 SOP，不以青春期一律切換。",
     accent: "#f1cd66",
     steps: [
       { phase: "RECOGNIZE", title: "確認無反應與呼吸異常", detail: "確認環境安全、刺激並呼叫；無正常呼吸或只有瀕死喘息，立即啟動支援並取得 AED／監視器。", action: "指定人員：壓胸、氣道、AED、計時／紀錄、通路與藥物。" },
@@ -288,6 +426,15 @@ const rhythmBranches: Record<RhythmKey, { label: string; subtitle: string; cycle
   },
 };
 
+const pathologyGuides: Record<PathologyKey, { label: string; system: string; mechanism: string; pattern: string[]; first: string[]; danger: string; avoid: string }> = {
+  "upper-airway": { label: "上呼吸道阻塞", system: "CROUP · EPIGLOTTITIS · FOREIGN BODY", mechanism: "兒童氣道半徑小；黏膜水腫、分泌物或異物只要讓管徑稍微變窄，阻力就會大幅上升。吸氣時胸腔負壓使胸外氣道更易塌陷，因此常先出現 stridor、胸凹與姿勢改變。", pattern: ["Croup：犬吠咳、聲音沙啞、吸氣性 stridor，常有上呼吸道感染前驅", "會厭炎／深頸感染：高燒、吞嚥痛、流口水、三腳架姿勢；避免刺激", "異物：突然發作、進食或玩耍時嗆咳，呼吸音可能單側減弱"], first: ["讓孩子維持最舒服姿勢，減少哭鬧與不必要操作", "給氧並備妥 BVM、抽吸與困難氣道資源", "依適應症與授權給藥；惡化時提前通知具兒科氣道能力醫院"], danger: "stridor 變小不一定改善；疲乏、意識下降或呼吸音消失可能代表氣流更少。", avoid: "疑會厭炎時，不強迫平躺、不用壓舌板反覆查看咽喉。" },
+  "lower-airway": { label: "下呼吸道疾病", system: "ASTHMA · BRONCHIOLITIS · PNEUMONIA", mechanism: "支氣管平滑肌收縮、黏膜水腫與分泌物造成呼氣流受限；小氣道阻塞可導致氣體滯留、換氣不均與疲乏。細支氣管炎以水腫與分泌物為主，與以支氣管痙攣為主的氣喘不完全相同。", pattern: ["Asthma：呼氣性 wheeze、呼氣延長、既往反覆發作或吸入藥反應", "Bronchiolitis：多見嬰兒，鼻炎後出現喘、爆裂音／wheeze、餵食下降", "Pneumonia：發燒、局部呼吸音異常、低氧；嬰幼兒可能只呈現活力與進食下降"], first: ["抽吸只在分泌物確實阻塞時進行，嬰兒先處理鼻腔阻塞", "氧合不足給氧；換氣不足則及早協助通氣", "支氣管擴張劑依疾病表現、病史、處方與 SOP，不把所有 wheeze 當氣喘"], danger: "安靜胸、說話／哭聲變弱、意識下降、發紺或正常化的呼吸速率合併疲乏，都是呼吸衰竭警訊。", avoid: "不要只追 SpO₂；呼吸作功、胸廓起伏、呼吸音與意識更早反映惡化。" },
+  shock: { label: "小兒休克", system: "HYPOVOLEMIC · DISTRIBUTIVE · CARDIOGENIC · OBSTRUCTIVE", mechanism: "氧氣輸送量不足以滿足組織需求。兒童先以心搏過速與血管收縮維持血壓，所以低血壓通常是晚期；不同病因對液體、血品與升壓／強心治療的反應不同。", pattern: ["代償期：心搏過速、CRT 延長、末梢冰冷或皮膚斑駁，但血壓仍可正常", "失代償期：低血壓、中央脈搏變弱、意識下降、尿量減少", "暖休克可見皮膚溫暖、脈壓增寬；心因性可能伴肝腫大、肺囉音與灌流差"], first: ["處理病因：止血、Epinephrine IM、氧合／通氣、解除阻塞性原因", "IV／IO、血糖、保暖；每次液體後重評反應與過量", "出血性休克及早轉血品；液體難治性敗血性休克依授權考慮升壓劑"], danger: "正常血壓不能排除休克；不要等血壓下降才開始復甦。", avoid: "不要把所有休克都用固定晶體液灌到 40–60 mL/kg。" },
+  anaphylaxis: { label: "全身性過敏", system: "VASODILATION · CAPILLARY LEAK · BRONCHOSPASM", mechanism: "介質釋放造成血管擴張、微血管滲漏、上呼吸道水腫與支氣管痙攣，可在短時間內同時導致分布性休克與呼吸衰竭。", pattern: ["皮膚／黏膜：蕁麻疹、潮紅、嘴唇舌頭腫；但嚴重過敏不一定有皮疹", "呼吸：聲音沙啞、stridor、wheeze、低氧", "循環／腸胃：低血壓、昏厥、持續腹痛或嘔吐，尤其在已知過敏原後"], first: ["立即 IM Epinephrine；不要等待所有系統症狀到齊", "平躺並依呼吸狀況調整，避免突然站立；給氧、監測並建立通路", "低血壓可審慎給等張晶質液；持續休克依 SOP／醫療指導升級"], danger: "皮膚症狀缺席、初次量到血壓正常或短暫好轉，都不能排除嚴重反應。", avoid: "抗組織胺、類固醇或霧化藥不能取代第一線 IM Epinephrine。" },
+  seizure: { label: "癲癇重積／意識改變", system: "ELECTRICAL ACTIVITY · HYPOXIA · METABOLIC CAUSES", mechanism: "持續異常腦部放電會增加耗氧、耗糖與乳酸生成；發作越久越難自行停止。低血糖、感染、缺氧、毒物與創傷都可能是可逆原因。", pattern: ["全身或局部抽搐、凝視、眼偏、口部自動症或發作後意識不清", "持續發作或反覆發作未恢復意識，視為時間敏感急症", "嬰幼兒低血糖、熱痙攣與中樞感染表現可能不典型"], first: ["計時、移除危險物、保護頭部；不壓制、不塞口", "氣道、氧合、必要通氣；立即測血糖並處理可逆原因", "依體重、途徑與 SOP 給抗痙攣藥，給藥前後備妥通氣與抽吸"], danger: "抽動停止後仍無有效呼吸，可能是發作後呼吸抑制或藥物效應，需立即重新評估 ABC。", avoid: "不要把所有發燒合併抽搐都直接判定為單純熱痙攣。" },
+  dka: { label: "糖尿病酮酸中毒", system: "INSULIN DEFICIENCY · OSMOTIC DIURESIS · ACIDOSIS", mechanism: "胰島素不足造成高血糖、滲透性利尿與脫水，同時脂肪分解產生酮體與代謝性酸中毒；深快呼吸是代償，不是單純呼吸道疾病。", pattern: ["多尿、口渴、體重下降、腹痛、噁心嘔吐與脫水", "Kussmaul 深快呼吸、呼氣可能有水果味", "頭痛、心率下降、意識惡化或異常血壓需警覺腦水腫"], first: ["ABCDE、血糖、心電監測、保暖並快速後送", "液體與胰島素需依兒科 DKA protocol；院前避免自行快速矯正", "意識改變時反覆評估瞳孔、GCS、通氣與灌流"], danger: "呼吸變慢或意識惡化不一定代表酸中毒改善，可能是疲乏或腦水腫。", avoid: "不要因高血糖就直接大量快速輸液或給胰島素推注。" },
+};
+
 export default function Home() {
   const [age, setAge] = useState<AgeKey>("newborn");
   const [emergency, setEmergency] = useState<EmergencyKey>("breathing");
@@ -305,6 +452,9 @@ export default function Home() {
   const [ohcaPath, setOhcaPath] = useState<OhcaKey>("infant");
   const [ohcaStep, setOhcaStep] = useState(0);
   const [ohcaRhythm, setOhcaRhythm] = useState<RhythmKey | null>(null);
+  const [quickFlowTopic, setQuickFlowTopic] = useState<QuickFlowTopic>("ohca");
+  const [quickFlowAge, setQuickFlowAge] = useState<QuickFlowAge>("infant");
+  const [pathology, setPathology] = useState<PathologyKey>("upper-airway");
   const [apgarTime, setApgarTime] = useState<ApgarTime>(1);
   const [maternalGuide, setMaternalGuide] = useState<MaternalKey>("assessment");
   const [apgarByTime, setApgarByTime] = useState<Record<ApgarTime, ApgarScores>>({ 1: blankApgar(), 5: blankApgar(), 10: blankApgar(), 15: blankApgar(), 20: blankApgar() });
@@ -325,6 +475,7 @@ export default function Home() {
   const currentAge = ageProfiles[age];
   const currentEmergency = emergencies[emergency];
   const currentSkill = skills.find((item) => item.id === skill) ?? skills[0];
+  const currentPathology = pathologyGuides[pathology];
   const percent = useMemo(() => Math.round((completed.length / skills.length) * 100), [completed]);
   const lengthZone = rulerZones.find((zone, index) => lengthCm >= zone.minCm && (lengthCm < zone.maxCm || index === rulerZones.length - 1)) ?? rulerZones[0];
   const weightZone = rulerZones.find((zone) => measuredWeight <= zone.maxKg) ?? rulerZones[rulerZones.length - 1];
@@ -340,7 +491,7 @@ export default function Home() {
   const croupEpinephrineMax = ["newborn", "infant", "toddler"].includes(vitalStage) ? 2.5 : vitalStage === "preschool" ? null : 5;
   const croupEpinephrineDose = croupEpinephrineMax === null ? null : Math.min(workingWeight * .5, croupEpinephrineMax);
   const phplsGlucose = vitalStage === "newborn"
-    ? { label: "D10W｜2 mL/kg", volume: workingWeight * 2, note: "PHPLS＜28 日新版列示（0.2 g/kg）" }
+    ? { label: "D10W｜2 mL/kg", volume: workingWeight * 2, note: "PHPLS 非創 v20260616 第48頁：＜28日，0.2 g/kg；不同教材有差異，依指定SOP" }
     : vitalStage === "infant"
       ? { label: "D10W｜5 mL/kg", volume: workingWeight * 5, note: "嬰兒＜1 歲" }
       : vitalStage === "toddler"
@@ -356,6 +507,7 @@ export default function Home() {
         ? { dose: "½ 顆｜6.25 mg", detail: "PHPLS：體重＞6 kg 至 12 kg" }
         : { dose: "教材未列示", detail: "體重≤6 kg，不自行外推" };
   const activeOhca = ohcaFlows[ohcaPath];
+  const activeQuickFlow = pediatricQuickFlows[quickFlowTopic][quickFlowAge];
   const currentOhcaStep = activeOhca.steps[ohcaStep];
   const ohcaProgress = Math.round(((ohcaStep + 1) / activeOhca.steps.length) * 100);
   const currentApgar = apgarByTime[apgarTime];
@@ -380,7 +532,12 @@ export default function Home() {
           <a href="#maternal" onClick={() => setMenuOpen(false)}>孕婦急症</a>
           <a href="#ages" onClick={() => setMenuOpen(false)}>年齡分流</a>
           <a href="#vitals" onClick={() => setMenuOpen(false)}>生命徵象</a>
+          <a href="#fluid-guide" onClick={() => setMenuOpen(false)}>輸液速查</a>
+          <a href="#clinical-reference" onClick={() => setMenuOpen(false)}>創傷／兒保</a>
+          <a href="#pathology" onClick={() => setMenuOpen(false)}>疾病學理</a>
           <a href="#navigator" onClick={() => setMenuOpen(false)}>急症導航</a>
+          <a href="#quick-flow" onClick={() => setMenuOpen(false)}>急救流程圖</a>
+          <a href="#compression-guide" onClick={() => setMenuOpen(false)}>壓胸速查</a>
           <a href="#ohca" onClick={() => setMenuOpen(false)}>OHCA 流程</a>
           <a href="#skills" onClick={() => setMenuOpen(false)}>技術教室</a>
           <a href="#ruler" onClick={() => setMenuOpen(false)}>互動小兒尺</a>
@@ -487,6 +644,94 @@ export default function Home() {
         <div className="vitals-sources"><span>資料來源：</span><a href="https://rightdecisions.scot.nhs.uk/dgrefhelp-nhs-dumfries-galloway/admissions/paediatric-admissions/" target="_blank" rel="noreferrer">NHS 小兒生命徵象 ↗</a><a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/pediatric-advanced-life-support" target="_blank" rel="noreferrer">2025 AHA/AAP PALS ↗</a><a href="https://www.who.int/data/gho/indicator-metadata-registry/imr-details/normothermia-on-admission" target="_blank" rel="noreferrer">WHO 新生兒正常體溫 ↗</a></div>
       </section>
 
+      <section className="fluid-guide-section" id="fluid-guide" aria-labelledby="fluid-guide-title">
+        <div className="fluid-guide-heading">
+          <div className="section-label light"><span>02A</span><p>FLUID BOLUS<br />輸液速查</p></div>
+          <div><p className="micro">BOLUS · REASSESS · DECIDE AGAIN</p><h2 id="fluid-guide-title">快速輸液，<br />每一輪都要重評。</h2></div>
+          <p>先辨認休克病因，再決定輸液量與速度。以下把 PHPLS 現場操作記憶點和 AHA 2025 的安全界線放在同一張速查卡。</p>
+        </div>
+
+        <div className="fluid-dose-strip" aria-label="小兒快速輸液三個核心數字">
+          <article><span>每次劑量</span><strong>10–20<small>mL/kg</small></strong><p>等張晶質液分次給予</p></article>
+          <article><span>PHPLS 給予時間</span><strong>10–15<small>min</small></strong><p>依病因、灌流與地方 SOP 調整</p></article>
+          <article className="warning"><span>首小時累積警戒</span><strong>40–60<small>mL/kg</small></strong><p>不是必須灌滿的目標量</p></article>
+        </div>
+
+        <section className="trauma-blood-card" aria-labelledby="trauma-blood-title">
+          <div className="trauma-blood-title"><span>TRAUMA / HEMORRHAGE</span><h3 id="trauma-blood-title">創傷出血：晶體液反應不佳，就要轉向血品。</h3><p>不要為了達到 40–60 mL/kg 而延遲止血、輸血或手術資源。</p></div>
+          <div className="trauma-blood-flow">
+            <article><span>01</span><b>先控制出血</b><p>XABCDE、直接加壓／止血帶、骨盆處置、保暖並快速啟動創傷中心資源。</p></article>
+            <article><span>02</span><b>初始等張晶質液</b><p>Normal Saline 或 Lactated Ringer&apos;s；PHPLS 教材列 20 mL/kg，可視反應重複 1–2 次，每次後重評。</p></article>
+            <article className="blood-step"><span>03</span><b>反應不佳／低血壓性出血休克</b><p>若系統有血品且已授權，優先血品持續復甦；AHA 2025 教材情境列 pRBC 10 mL/kg。</p></article>
+            <article><span>04</span><b>持續大量出血</b><p>依創傷輸血 protocol／醫療指導啟動平衡血品或全血策略，避免只反覆追加晶體液。</p></article>
+          </div>
+          <div className="trauma-blood-scope"><b>院前安全界線</b><p>血品種類、相容性、保存／加溫、輸注速度與不良反應處置，必須依所屬 EMS 系統能力、血品 protocol 及醫療指導；本站數值不能單獨作為輸血醫囑。</p></div>
+        </section>
+
+        <div className="fluid-decision-grid">
+          <article><span>01</span><div><b>給完一輪，先看有沒有改善</b><p>重評心率、血壓、CRT、中央／周邊脈搏、意識、皮膚溫度與尿量；仍有休克且沒有液體過量，才考慮下一輪。</p></div></article>
+          <article><span>02</span><div><b>看到過量警訊，停止自動追加</b><p>呼吸窘迫加劇、肺囉音、SpO₂ 下降、肝腫大或灌流未改善，都應停止固定重複輸液並重新判斷病因。</p></div></article>
+          <article><span>03</span><div><b>40–60 mL/kg 是轉換策略節點</b><p>PHPLS 列為一小時累積提醒；敗血性休克若仍無反應，應視為液體難治性休克，依層級、SOP 與醫療指導及早考慮升壓／強心治療。</p></div></article>
+        </div>
+
+        <div className="fluid-cause-guardrails">
+          <article><b>疑出血性休克</b><p>先控制出血；晶體液反應不佳或已呈低血壓性出血休克時，有血品則優先血品。pRBC 教學劑量 10 mL/kg，僅依 protocol／醫療指導執行。</p></article>
+          <article><b>疑心因性休克</b><p>不要直接套用反覆 10–20 mL/kg；採更審慎的小量策略並儘早尋求醫療指導。</p></article>
+          <article><b>新生兒出生轉銜</b><p>不套用本表；有低血容量證據且標準復甦無效時，依新生兒復甦流程處理。</p></article>
+        </div>
+
+        <div className="fluid-guide-footer"><p><b>記憶句：</b>10–20 分次給、10–15 分鐘進、每次都重評；40–60 是警戒線，不是目標線。</p><a href="#ruler">用互動小兒尺計算 10／20 mL/kg →</a></div>
+        <div className="fluid-sources"><span>校正依據：</span><a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/pediatric-advanced-life-support" target="_blank" rel="noreferrer">AHA／AAP 2025 PALS｜Shock Management ↗</a><a href="https://www.heart.org/-/media/32508158BE214432B3A4DE95E7BE009F.pdf" target="_blank" rel="noreferrer">AHA 2025 PALS 教材｜pRBC 10 mL/kg ↗</a><small>PHPLS 2026：一般快速輸液 10–20 mL/kg／10–15 min；創傷教材列 20 mL/kg 等張晶質液、可重複 1–2 次，反應不佳考慮 pRBC 10 mL/kg。實際依病因、層級、地方 SOP 與醫療指導。</small></div>
+      </section>
+
+      <section className="clinical-reference-section" id="clinical-reference" aria-labelledby="clinical-reference-title">
+        <div className="clinical-reference-heading">
+          <div className="section-label"><span>02B</span><p>TRAUMA<br />創傷／兒保</p></div>
+          <div><p className="micro">ASSESS · SUPPORT · PROTECT</p><h2 id="clinical-reference-title">看懂表現，<br />也看見不合理之處。</h2></div>
+          <p>把小兒創傷教材中容易漏掉的三組內容放在一起：發展適齡 GCS、燒燙傷含糖維持液，以及兒少保護通報。</p>
+        </div>
+
+        <article className="pgcs-card">
+          <div className="pgcs-intro"><span>PEDIATRIC GCS</span><h3>4 歲以下：V 分數看的是發展適齡反應</h3><p>不能要求尚未具備完整語言能力的孩子回答人物、時間與地點。請記錄 E、V、M 各分項與實際表現，不只寫總分。</p></div>
+          <div className="pgcs-table-wrap"><table><caption>4 歲以下 Pediatric GCS｜最佳語言反應</caption><thead><tr><th>V</th><th>可觀察表現</th><th>現場口語描述</th></tr></thead><tbody>
+            <tr><th>5</th><td>清醒；能社交微笑、注視追蹤，咿呀／牙牙學語或說出符合平常能力的字詞</td><td>「互動與發聲符合平日」</td></tr>
+            <tr><th>4</th><td>哭泣但可安撫；字詞比平常少，或自發出現煩躁哭聲</td><td>「會哭，但照顧者可安撫」</td></tr>
+            <tr><th>3</th><td>持續煩躁、哭聲不恰當或難以安撫</td><td>「持續易怒／哭鬧，無法正常互動」</td></tr>
+            <tr><th>2</th><td>只對疼痛刺激發出呻吟聲</td><td>「痛刺激時僅呻吟」</td></tr>
+            <tr><th>1</th><td>無任何語音或哭聲反應</td><td>「對疼痛無語音反應」</td></tr>
+          </tbody></table></div>
+          <div className="pgcs-note"><b>版本提醒</b><p>Pediatric GCS 有不同修正版；V3 的用語可能寫成「持續煩躁」或「只對疼痛哭」。同一機構應使用同一張表，趨勢追蹤時不要中途換版本。</p></div>
+        </article>
+
+        <div className="burn-protection-grid">
+          <article className="burn-dextrose-card"><span>BURN / ≤30 KG</span><h3>燒燙傷復甦液之外，還要顧基礎糖分。</h3><p>ABLS 教材將嬰幼兒及體重 ≤30 kg 兒童列為低肝醣儲備族群：除燒傷復甦液外，另給含 5% dextrose 的 Lactated Ringer&apos;s 維持液，並持續監測血糖。</p><ul><li>含糖維持液與燒傷復甦公式是兩筆不同需求，不可互相取代或重複計算。</li><li>現場若無合適預混液，不自行把高濃度葡萄糖加入輸液袋；依地方 burn／pediatric protocol 與醫療指導。</li><li>使用 Lund–Browder chart 或病童手掌約 1% 估算，不用成人九法則直接套小兒。</li></ul><div><b>低血糖、意識變化、失溫與尿量</b><span>都是持續重評指標。</span></div></article>
+
+          <article className="abuse-pattern-card"><span>INJURY PATTERN</span><h3>特殊傷型是警訊，不是單獨定罪。</h3><ul><li><b>頭眼：</b>視網膜出血、無合理機轉的顱內傷或反覆神經症狀。</li><li><b>燒傷：</b>香菸樣圓形接觸傷、烙印傷、界線銳利且對稱的浸泡傷、臀部／會陰部燙傷。</li><li><b>瘀傷：</b>不會自主移動孩子的任何瘀青；耳、頸、軀幹、臀部、臉頰、眼周或具手印／器具形狀。</li><li><b>病史：</b>無人目擊合併嚴重傷勢、將責任歸咎於兒童／手足、敘述反覆改變、與發展能力或檢查不符、延遲就醫。</li></ul><p>上述皆需排除凝血疾病、皮膚病與合理意外機轉；客觀記錄，不誘導、不指控。</p></article>
+        </div>
+
+        <article className="mohw-screen-card">
+          <div className="mohw-screen-title"><span>TAIWAN / MOHW</span><h3>衛福部疑似兒少身體虐待簡易篩檢</h3><p>第 1–4 項任兩項，或第 5／6 項單獨成立：應通報或諮詢兒少保護小組，進行更仔細篩檢。</p></div>
+          <ol><li><span>1</span><p>一年內超過三次以上急診外傷就醫紀錄</p></li><li><span>2</span><p>病史不一致</p></li><li><span>3</span><p>病史與身體檢查不符</p></li><li><span>4</span><p>延遲就醫</p></li><li><span>5</span><p>一歲以下任何骨折或頭部外傷</p></li><li><span>6</span><p>低處跌落（約 150 cm 以下）後造成顱內損傷或骨折</p></li></ol>
+          <div className="mohw-threshold-note"><b>教材與官方表的差異</b><p>PHPLS 教材把「延遲就醫」操作化為一般傷害＞72 小時、嚴重傷害＞24 小時；衛福部公開簡易表本身只寫「延遲就醫」。兩者請分層註記，不把教材時間門檻冒充法規文字。</p></div>
+          <div className="bruise-color-warning"><b>瘀青顏色不能定年齡</b><p>可以記錄紅、紫、綠、黃等顏色與分布，但目前沒有科學依據能只靠肉眼顏色推算瘀青形成日期。應比較位置、型態、孩子活動能力、病史一致性與完整檢查。</p></div>
+          <div className="reporting-route"><b>通報路徑</b><p>醫事人員發現疑似案件，依衛福部流程於 24 小時內以「關懷 e 起來」／書面方式通報；可先撥 113 諮詢與通報。兒少生命安全有立即危險時，同步撥 110，並在主管機關接手前持續提供保護與醫療照護。</p></div>
+          <div className="clinical-reference-sources"><a href="https://www.rch.org.au/clinicalguide/guideline_index/Altered_conscious_state/" target="_blank" rel="noreferrer">RCH Pediatric GCS ↗</a><a href="https://ameriburn.org/wp-content/uploads/2019/08/2018-abls-providermanual.pdf" target="_blank" rel="noreferrer">ABA ABLS Provider Manual ↗</a><a href="https://www.mohw.gov.tw/dl-50290-25953c1b-d2a1-402f-abe9-64d6afa21012.html" target="_blank" rel="noreferrer">衛福部簡易篩檢表 ↗</a><a href="https://www.mohw.gov.tw/dl-2385-c178e3a9-54c7-4f92-9c07-c2b7d7fa72d7.html" target="_blank" rel="noreferrer">衛福部 2026 兒少保護醫療流程 ↗</a><a href="https://childprotection.rcpch.ac.uk/child-protection-evidence/bruising-systematic-review/" target="_blank" rel="noreferrer">RCPCH Bruising Review ↗</a></div>
+        </article>
+      </section>
+
+      <section className="pathology-section" id="pathology" aria-labelledby="pathology-title">
+        <div className="pathology-heading"><div className="section-label light"><span>02C</span><p>PALS / APLS<br />疾病學理</p></div><div><p className="micro">MECHANISM · PATTERN · PRIORITY</p><h2 id="pathology-title">知道為什麼，<br />才不會只背流程。</h2></div><p>這一區不重複藥物表，而是把病理機轉、典型表現與現場第一優先串在一起。</p></div>
+        <div className="pathology-workbench">
+          <div className="pathology-tabs" role="tablist" aria-label="PALS 與 APLS 疾病學理分類">{(Object.keys(pathologyGuides) as PathologyKey[]).map((key, index) => <button key={key} className={pathology === key ? "active" : ""} role="tab" aria-selected={pathology === key} onClick={() => setPathology(key)}><span>{String(index + 1).padStart(2, "0")}</span><b>{pathologyGuides[key].label}</b><small>{pathologyGuides[key].system}</small></button>)}</div>
+          <article className="pathology-panel" aria-live="polite">
+            <div className="pathology-mechanism"><span>PATHOPHYSIOLOGY</span><h3>{currentPathology.label}</h3><p>{currentPathology.mechanism}</p></div>
+            <div className="pathology-columns"><div><b>典型表現與鑑別</b>{currentPathology.pattern.map((item) => <p key={item}>• {item}</p>)}</div><div><b>現場第一優先</b>{currentPathology.first.map((item) => <p key={item}>→ {item}</p>)}</div></div>
+            <div className="pathology-danger"><div><b>惡化警訊</b><p>{currentPathology.danger}</p></div><div><b>避免誤判</b><p>{currentPathology.avoid}</p></div></div>
+          </article>
+        </div>
+        <div className="pathology-sources"><span>核心依據｜APLS 第三版＋AHA／AAP 2025 PALS</span><a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/pediatric-advanced-life-support" target="_blank" rel="noreferrer">PALS Guidelines ↗</a></div>
+      </section>
+
       <section className="navigator-section" id="navigator">
         <div className="navigator-head"><div className="section-label light"><span>03</span><p>DECISION<br />急症導航</p></div><div><p className="micro">FROM FIRST LOOK TO FIRST ACTION</p><h2>從第一眼，<br />走到第一個正確動作。</h2></div><p>這不是診斷工具，而是訓練現場優先順序：辨識生理威脅、先做會改變結果的處置，再反覆評估。</p></div>
         <div className="navigator-body">
@@ -497,6 +742,69 @@ export default function Home() {
             <div className="field-note"><span>FIELD NOTE</span><p>{currentEmergency.note}</p></div>
           </article>
         </div>
+      </section>
+
+      <section className="quick-flow-section" id="quick-flow">
+        <div className="quick-flow-heading">
+          <div className="section-label"><span>04</span><p>QUICK FLOW<br />急救流程圖</p></div>
+          <div><p className="micro">CHOOSE EVENT · CHOOSE AGE · FOLLOW THE BRANCH</p><h2>先選事件與年齡，<br />一眼看完整分支。</h2></div>
+          <p>適合課堂投影、手機速查與情境演練。先用上方按鈕選 OHCA 或異物梗塞，再選病人年齡；下方會同步顯示該流程的關鍵決策。</p>
+        </div>
+
+        <div className="quick-flow-controls">
+          <div className="quick-flow-topic" role="tablist" aria-label="選擇急救事件">
+            <button className={quickFlowTopic === "ohca" ? "active" : ""} onClick={() => setQuickFlowTopic("ohca")} role="tab" aria-selected={quickFlowTopic === "ohca"}><small>01</small><b>OHCA／心跳停止</b></button>
+            <button className={quickFlowTopic === "choking" ? "active" : ""} onClick={() => setQuickFlowTopic("choking")} role="tab" aria-selected={quickFlowTopic === "choking"}><small>02</small><b>異物梗塞 FBAO</b></button>
+          </div>
+          <div className="quick-flow-age" role="tablist" aria-label="選擇病人年齡">
+            {(Object.keys(quickFlowAges) as QuickFlowAge[]).map((key) => <button key={key} className={quickFlowAge === key ? "active" : ""} onClick={() => setQuickFlowAge(key)} role="tab" aria-selected={quickFlowAge === key}><b>{quickFlowAges[key].label}</b><small>{quickFlowAges[key].scope}</small></button>)}
+          </div>
+        </div>
+
+        <article className={`quick-flow-board ${quickFlowTopic}`} aria-live="polite">
+          <header><span>{quickFlowTopic === "ohca" ? "OHCA" : "FBAO"} · {quickFlowAges[quickFlowAge].label}</span><h3>{activeQuickFlow.title}</h3><p>{activeQuickFlow.scope}</p></header>
+          <div className="quick-flow-map">
+            <div className="flow-node flow-start"><small>START</small><b>辨認起點</b><p>{activeQuickFlow.start}</p></div>
+            <div className="flow-arrow" aria-hidden="true">↓</div>
+            <div className="flow-node flow-decision"><small>DECISION</small><b>{activeQuickFlow.decision}</b></div>
+            <div className="flow-branches" aria-label="流程分支">
+              <section className="flow-branch yes"><div className="branch-arrow" aria-hidden="true"><span>↙</span></div><h4>{activeQuickFlow.yes.label}</h4><ol>{activeQuickFlow.yes.steps.map((step, index) => <li key={step}><span>{index + 1}</span><p>{step}</p></li>)}</ol></section>
+              <section className="flow-branch no"><div className="branch-arrow" aria-hidden="true"><span>↘</span></div><h4>{activeQuickFlow.no.label}</h4><ol>{activeQuickFlow.no.steps.map((step, index) => <li key={step}><span>{index + 1}</span><p>{step}</p></li>)}</ol></section>
+            </div>
+          </div>
+          <footer><b>現場記憶點</b><p>{activeQuickFlow.footer}</p></footer>
+        </article>
+
+        <div className="quick-flow-sources"><span>依據 AHA／AAP 2025：</span><a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/pediatric-basic-life-support" target="_blank" rel="noreferrer">Pediatric BLS ↗</a><a href="https://cpr.heart.org/-/media/CPR-Files/CPR-Guidelines-Files/2025-Algorithms/Algorithm-BLS-Infant-FBAO-250122.pdf" target="_blank" rel="noreferrer">嬰兒 FBAO 流程 ↗</a><a href="https://cpr.heart.org/-/media/CPR-Files/CPR-Guidelines-Files/2025-Algorithms/Algorithm-BLS-Child-FBAO-250130.pdf" target="_blank" rel="noreferrer">兒童 FBAO 流程 ↗</a><a href="https://cpr.heart.org/-/media/CPR-Files/CPR-Guidelines-Files/2025-Algorithms/Algorithm-PALS-CA-250123.pdf" target="_blank" rel="noreferrer">PALS 心停流程 ↗</a></div>
+      </section>
+
+      <section className="compression-guide-section" id="compression-guide" aria-labelledby="compression-guide-title">
+        <div className="compression-guide-heading">
+          <div className="section-label light"><span>04A</span><p>COMPRESSION<br />壓胸速查</p></div>
+          <div><p className="micro">AGE FIRST · DEPTH · RATE · RATIO</p><h2 id="compression-guide-title">不同年齡層，<br />一張表立即辨識。</h2></div>
+          <p>先分辨是否仍在出生轉銜期，再看按壓位置、速率、深度與通氣比例。手機可左右滑動，左側項目會固定。</p>
+        </div>
+
+        <div className="compression-table-wrap" tabIndex={0} aria-label="不同年齡層胸外按壓指引表，可左右捲動">
+          <table className="compression-table">
+            <caption>AHA 2025 不同年齡層胸外按壓指引速查</caption>
+            <thead><tr><th scope="col">比較項目</th><th scope="col"><b>出生時新生兒</b><small>出生當下／轉銜期</small></th><th scope="col"><b>嬰兒</b><small>＜1 歲，非出生轉銜</small></th><th scope="col"><b>兒童</b><small>1 歲至青春期徵象</small></th><th scope="col"><b>青春期後／成人</b><small>已有青春期徵象</small></th></tr></thead>
+            <tbody>
+              <tr><th scope="row">何時開始</th><td>有效正壓通氣 <strong>30 秒</strong>、可見胸廓起伏後，心率仍<strong>＜60／分</strong></td><td colSpan={2}>10 秒內無法明確摸到脈搏；或心率<strong>＜60／分</strong>且灌流不良，經氧合與通氣仍未改善</td><td>10 秒內無法明確摸到脈搏</td></tr>
+              <tr><th scope="row">位置與手法</th><td>胸骨下 1/3、劍突上方；<strong>雙拇指環抱法優先</strong></td><td>胸骨下半部；<strong>單手掌根</strong>或<strong>雙拇指環抱法</strong>。AHA 2025 已移除兩指法</td><td>胸部中央、胸骨下半部；依體型使用<strong>單手或雙手</strong></td><td>胸部中央、胸骨下半部；<strong>雙手掌根重疊</strong></td></tr>
+              <tr><th scope="row">按壓速率</th><td><strong>90 次／分</strong><small>配合 30 次通氣，共 120 個動作／分</small></td><td colSpan={3}><strong>100–120 次／分</strong></td></tr>
+              <tr><th scope="row">按壓深度</th><td>胸廓前後徑約 <strong>1/3</strong></td><td>胸廓前後徑至少 1/3，約 <strong>4 cm</strong></td><td>胸廓前後徑至少 1/3，約 <strong>5 cm</strong></td><td>至少 <strong>5 cm</strong>，並<strong>避免超過 6 cm</strong></td></tr>
+              <tr><th scope="row">按壓：通氣</th><td><strong>3:1</strong><small>同步進行</small></td><td colSpan={2}>單人 <strong>30:2</strong>；雙人醫療救援者 <strong>15:2</strong></td><td><strong>30:2</strong></td></tr>
+              <tr><th scope="row">進階氣道後</th><td>維持同步 <strong>3:1</strong>；開始按壓前宜先建立可有效通氣的替代氣道</td><td colSpan={2}>連續按壓；每 <strong>2–3 秒 1 次</strong>通氣（20–30 次／分）</td><td>連續按壓；每 <strong>6 秒 1 次</strong>通氣（10 次／分）</td></tr>
+              <tr><th scope="row">脈搏／心率評估</th><td>以胸前聽診快速評估；ECG 是最準確的心率測量方式</td><td><strong>肱動脈</strong></td><td><strong>頸動脈或股動脈</strong></td><td><strong>頸動脈</strong></td></tr>
+              <tr><th scope="row">AED／去顫</th><td>出生轉銜復甦不以 AED 為常規；依新生兒復甦流程監測心率</td><td colSpan={2}>儘速使用 AED；有兒童劑量衰減器／兒童貼片時優先使用</td><td>儘速使用標準 AED</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="compression-memory-strip"><b>共同品質目標</b><span>硬而平的表面</span><span>完整胸廓回彈</span><span>中斷盡量少於 10 秒</span><span>嬰兒／兒童／成人每 2 分鐘輪替；出生時新生兒每 2–5 分鐘</span></div>
+        <div className="compression-scope-note"><b>不要混用流程</b><p>「出生時新生兒」3:1 僅限出生當下轉銜／復甦。已離開出生轉銜情境的嬰兒，使用兒科 BLS 的 30:2 或雙人 15:2。異物梗塞一旦無反應，從胸外按壓開始 CPR。</p></div>
+        <div className="compression-sources"><span>依據 AHA／AAP 2025：</span><a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/neonatal-resuscitation" target="_blank" rel="noreferrer">Neonatal Resuscitation ↗</a><a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/pediatric-basic-life-support" target="_blank" rel="noreferrer">Pediatric BLS ↗</a><a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/adult-basic-life-support" target="_blank" rel="noreferrer">Adult BLS ↗</a></div>
       </section>
 
       <section className="ohca-section" id="ohca" style={{ "--ohca-accent": activeOhca.accent } as React.CSSProperties}>
@@ -569,6 +877,8 @@ export default function Home() {
           <article className="skill-detail">
             <div className="skill-top"><div><span>{currentSkill.group} / PROCEDURE</span><h3>{currentSkill.title}</h3><p>{currentSkill.lead}</p></div><div className="procedure-mark">STEP<br /><b>01–05</b></div></div>
             <div className="skill-mnemonic"><span>MEMORY / 口訣</span><b>{currentSkill.mnemonic}</b></div>
+            {currentSkill.id === "im" && <ImLandmarkVisual />}
+            {currentSkill.id === "rectal" && <RectalMedicationVisual />}
             <ol>{currentSkill.steps.map((step, index) => <li key={step}><span>{String(index + 1).padStart(2, "0")}</span><p>{step}</p></li>)}</ol>
             <div className="skill-check-grid"><div className="skill-success"><span>✓</span><p><b>證明操作有效</b>{currentSkill.success}</p></div><div className="skill-pitfalls"><b>常見失分點</b>{currentSkill.pitfalls.map((item) => <p key={item}>× {item}</p>)}</div></div>
             <div className="skill-actions"><button className={completed.includes(currentSkill.id) ? "done" : ""} onClick={() => markSkill(currentSkill.id)}>{completed.includes(currentSkill.id) ? "✓ 已完成檢核" : "標記已完成檢核"}</button><p>技術需由合格教官以實體器材進行最終確認。</p></div>
@@ -603,12 +913,12 @@ export default function Home() {
               <p>已知體重時，所有劑量計算皆以實測值優先；色帶只負責協助整理器材。</p>
             </div> : <div className="ruler-input best-guess-input">
               <div className="best-guess-kind" role="group" aria-label="Best Guess 年齡單位">
-                <button className={bestGuessAgeUnit === "months" ? "active" : ""} onClick={() => { setBestGuessAgeUnit("months"); setVitalStage(bestGuessMonths <= 1 ? "newborn" : "infant"); }}>1–11 個月／月齡</button>
+                <button className={bestGuessAgeUnit === "months" ? "active" : ""} onClick={() => { setBestGuessAgeUnit("months"); setVitalStage("infant"); }}>1–11 個月／月齡</button>
                 <button className={bestGuessAgeUnit === "years" ? "active" : ""} onClick={() => { setBestGuessAgeUnit("years"); setVitalStage(vitalStageForBestGuess("years", bestGuessYears)); }}>1–14 歲／足歲</button>
               </div>
               {bestGuessAgeUnit === "months" ? <>
                 <label htmlFor="best-guess-months"><span>月齡</span><b>{bestGuessMonths}<small>個月</small></b></label>
-                <input id="best-guess-months" type="range" min="1" max="11" step="1" value={bestGuessMonths} onChange={(event) => { const months = Number(event.target.value); setBestGuessMonths(months); setVitalStage(months <= 1 ? "newborn" : "infant"); }} />
+                <input id="best-guess-months" type="range" min="1" max="11" step="1" value={bestGuessMonths} onChange={(event) => { const months = Number(event.target.value); setBestGuessMonths(months); setVitalStage("infant"); }} />
                 <div className="ruler-scale" aria-hidden="true"><span>1 個月</span><i /><i /><i /><i /><i /><span>11 個月</span></div>
               </> : <>
                 <label htmlFor="best-guess-years"><span>足歲</span><b>{bestGuessYears}<small>歲</small></b></label>
@@ -637,14 +947,14 @@ export default function Home() {
             <div className="output-grid">
               <article><span>01 / 電擊</span><h3>去顫能量</h3><dl><div><dt>第一次</dt><dd>{formatNumber(workingWeight * 2)} J</dd></div><div><dt>第二次</dt><dd>{formatNumber(workingWeight * 4)} J</dd></div><div><dt>後續</dt><dd>≥ {formatNumber(workingWeight * 4)} J</dd></div></dl><small>後續不超過 10 J/kg 或成人最大劑量。</small></article>
               <article><span>02 / 急救藥物</span><h3>依問題 × 途徑整合</h3><dl><div><dt>OHCA｜Epinephrine IV／IO</dt><dd>{formatNumber(Math.min(workingWeight * .01, 1))} mg</dd></div><div><dt>0.1 mg/mL 製劑｜IV／IO</dt><dd>{formatNumber(Math.min(workingWeight * .1, 10))} mL</dd></div><div><dt>嚴重過敏｜Epinephrine IM</dt><dd>{formatNumber(Math.min(workingWeight * .01, .3))} mg＝{formatNumber(Math.min(workingWeight * .01, .3))} mL</dd></div><div><dt>VF／無脈 VT｜Amiodarone IV／IO</dt><dd>{formatNumber(Math.min(workingWeight * 5, 300))} mg</dd></div><div><dt>替代｜Lidocaine IV／IO</dt><dd>{formatNumber(workingWeight)} mg</dd></div></dl><small>OHCA：Epinephrine 0.01 mg/kg，單次上限 1 mg、每 3–5 分鐘。嚴重過敏：1 mg/mL 製劑 IM 0.01 mg/kg，單次上限 0.3 mg，必要時每 5–10 分鐘依流程重複。適應症、濃度與途徑不可互換。</small></article>
-              <article><span>03 / 氣道</span><h3>起始尺寸</h3><dl><div><dt>有囊 ETT</dt><dd>{outsideColorRange ? "依 SOP" : `${activeZone.cuffed} mm`}</dd></div><div><dt>無囊 ETT</dt><dd>{outsideColorRange ? "依 SOP" : `${activeZone.uncuffed} mm`}</dd></div><div><dt>口角深度</dt><dd>{outsideColorRange ? "依 SOP" : `${activeZone.depth} cm`}</dd></div><div><dt>LMA</dt><dd>Size {lmaSizeFor(workingWeight)}</dd></div></dl><small>準備相鄰尺寸；超出色帶範圍時不套用色區尺寸。以胸廓、聽診、波形 ETCO₂ 及影像確認位置。</small></article>
+              <article><span>03 / 氣道</span><h3>起始尺寸</h3><dl><div><dt>有囊 ETT</dt><dd>{outsideColorRange ? "依 SOP" : `${activeZone.cuffed} mm`}</dd></div><div><dt>無囊 ETT</dt><dd>{outsideColorRange ? "依 SOP" : `${activeZone.uncuffed} mm`}</dd></div><div><dt>口角深度</dt><dd>{outsideColorRange ? "依 SOP" : `${activeZone.depth} cm`}</dd></div><div><dt>LMA</dt><dd>Size {outsideColorRange ? "依器材 IFU" : lmaSizeFor(workingWeight)}</dd></div></dl><small>準備相鄰尺寸；超出色帶範圍時不套用色區尺寸。以胸廓、聽診、波形 ETCO₂ 及影像確認位置。</small></article>
               <article><span>05 / 通氣</span><h3>潮氣量速算</h3><dl><div><dt>{selectedVitalSigns.stage}｜{tidalRange[0]}–{tidalRange[1]} mL/kg</dt><dd>{formatNumber(workingWeight * tidalRange[0])}–{formatNumber(workingWeight * tidalRange[1])} mL</dd></div><div><dt>目前年齡帶</dt><dd>{selectedVitalSigns.age}</dd></div></dl><small>僅作設備可監測容量時的起始參考；手壓 BVM 不應追求把氣囊擠完，以可見胸廓起伏、心率、血氧與波形 ETCO₂ 調整。</small></article>
-              <article><span>04 / 循環</span><h3>補液速算</h3><dl><div><dt>10 mL/kg</dt><dd>{formatNumber(workingWeight * 10)} mL</dd></div><div><dt>20 mL/kg</dt><dd>{formatNumber(workingWeight * 20)} mL</dd></div></dl><small>先分病因：敗血／分布性休克可依 SOP 分次給予並每次重評；疑出血性休克優先止血與血品，避免固定反覆晶質液；心因性休克需更小量、更審慎。</small></article>
+              <article><span>04 / 循環</span><h3>補液／創傷血品速算</h3><dl><div><dt>晶體液 10 mL/kg</dt><dd>{formatNumber(workingWeight * 10)} mL</dd></div><div><dt>晶體液 20 mL/kg</dt><dd>{formatNumber(workingWeight * 20)} mL</dd></div><div><dt>pRBC 10 mL/kg</dt><dd>{formatNumber(workingWeight * 10)} mL</dd></div></dl><small>PHPLS：晶體液 10–20 mL/kg 於 10–15 分鐘分次給予，每次後重評。創傷出血對晶體液反應不佳時，AHA／PHPLS 教材列 pRBC 10 mL/kg；僅在系統有血品、符合層級與 protocol／醫療指導時執行。首小時 40–60 mL/kg 是累積警戒，不是必須達到的目標。</small></article>
               <article><span>07 / 有脈搏心律</span><h3>心率藥物速算</h3><dl><div><dt>Atropine｜0.02 mg/kg</dt><dd>{formatNumber(Math.min(Math.max(workingWeight * .02, .1), .5))} mg</dd></div><div><dt>Adenosine｜首次 0.1 mg/kg</dt><dd>{formatNumber(Math.min(workingWeight * .1, 6))} mg</dd></div><div><dt>Adenosine｜第二次 0.2 mg/kg</dt><dd>{formatNumber(Math.min(workingWeight * .2, 12))} mg</dd></div></dl><small>Atropine：症狀性心搏過緩且疑迷走神經張力增加或原發性 AV block，最低 0.1 mg、單次上限 0.5 mg，可重複一次。Adenosine：規則窄 QRS SVT，快速 IV／IO 推注後立即沖管。</small></article>
               <article><span>06 / 低血糖</span><h3>Rule of 50 速算</h3><dl><div><dt>{phplsGlucose?.label ?? "目前年齡對應"}</dt><dd>{phplsGlucose ? `${formatNumber(phplsGlucose.volume)} mL` : "PHPLS 表未明列"}</dd></div></dl><small>{phplsGlucose ? phplsGlucose.note : "4 歲至青春期前未在 PHPLS 該頁獨立列示，不自行外推濃度。"} 每次只使用目前年齡對應方案；依機關 SOP／醫療指導，給藥後 5–10 分鐘重測。</small></article>
               <article><span>08 / 癲癇重積</span><h3>PHPLS Midazolam</h3><dl><div><dt>體重分段</dt><dd>{workingWeight > 40 ? "＞40 kg" : workingWeight >= 13 ? "13–40 kg" : "＜13 kg"}</dd></div><div><dt>IM 單次劑量</dt><dd>{midazolamDose ? `${midazolamDose.mg} mg` : "教材未明列"}</dd></div><div><dt>5 mg/mL 製劑</dt><dd>{midazolamDose ? `${midazolamDose.mL} mL` : "依 SOP／醫療指導"}</dd></div></dl><small>PHPLS 教材為固定體重分段、單次 IM 劑量，不把未明列的 ＜13 kg 自行外推；教材實務抽藥最小單位為 0.1 mL＝0.5 mg。給藥前備妥通氣與抽吸，給藥後持續監測。</small></article>
-              <article><span>09 / 呼吸藥物</span><h3>WHEEZING 與 CROUP 分開看</h3><dl><div><dt>WHEEZING｜自備 MDI／DPI</dt><dd>2 噴／次</dd></div><div><dt>WHEEZING｜每噴間隔</dt><dd>1 分鐘</dd></div><div><dt>WHEEZING｜送醫＞20 分鐘</dt><dd>每 20 分鐘可再給</dd></div><div><dt>WHEEZING｜IH A+B／單 B，＜5 歲</dt><dd>½ 支，N/S 至 4 mL</dd></div><div><dt>嚴重 WHEEZING｜Epinephrine SC</dt><dd>0.3–0.5 mg</dd></div><div><dt>CROUP 哮吼｜Epinephrine IH 0.5 mg/kg</dt><dd>{croupEpinephrineDose === null ? "4–5 歲帶：核對實際年齡" : `${formatNumber(croupEpinephrineDose)} mg`}</dd></div><div><dt>CROUP 哮吼｜PHPLS 上限</dt><dd>{croupEpinephrineMax === null ? "依實際年齡／SOP" : `${croupEpinephrineMax} mg`}</dd></div></dl><small>WHEEZING：A＋B／單 B 以氧氣 6 L/min 霧化；SC Epinephrine 僅限嚴重病人、先聯絡醫療指導並核對心血管禁忌。CROUP：Epinephrine 不稀釋；＜4 歲上限 2.5 mg、＞4 歲上限 5 mg。途徑不可混用。</small></article>
-              <article><span>10 / 退燒塞劑</span><h3>Diclofenac 12.5 mg／顆</h3><dl><div><dt>目前年齡與體重</dt><dd>{selectedVitalSigns.stage}｜{formatNumber(workingWeight)} kg</dd></div><div><dt>PHPLS 速查</dt><dd>{diclofenac.dose}</dd></div></dl><small>{diclofenac.detail}。TFDA 仿單列為處方藥且兒童用法限一歲以上；先核對 NSAID 禁忌、適應症、地方 SOP 與醫療指導。塞劑尖端朝內，完全置入後輕夾雙臀 10–15 秒。</small></article>
+              <article><span>09 / 呼吸藥物</span><h3>WHEEZING 與 CROUP 分開看</h3><dl><div><dt>WHEEZING｜核准自備 MDI</dt><dd>2 噴／次</dd></div><div><dt>WHEEZING｜每噴間隔</dt><dd>1 分鐘</dd></div><div><dt>WHEEZING｜送醫＞20 分鐘</dt><dd>每 20 分鐘可再給</dd></div><div><dt>WHEEZING｜IH A+B／單 B，＜5 歲</dt><dd>先核對製劑 mg/mL 與處方</dd></div><div><dt>嚴重 WHEEZING｜Epinephrine SC</dt><dd>0.3–0.5 mg</dd></div><div><dt>CROUP 哮吼｜Epinephrine IH 0.5 mg/kg</dt><dd>{croupEpinephrineDose === null ? "4–5 歲帶：核對實際年齡" : `${formatNumber(croupEpinephrineDose)} mg`}</dd></div><div><dt>CROUP 哮吼｜PHPLS 上限</dt><dd>{croupEpinephrineMax === null ? "依實際年齡／SOP" : `${croupEpinephrineMax} mg`}</dd></div></dl><small>WHEEZING：A＋B／單 B 以氧氣 6 L/min 霧化；SC Epinephrine 僅限嚴重病人、先聯絡醫療指導並核對心血管禁忌。CROUP：Epinephrine 不稀釋；＜4 歲上限 2.5 mg、＞4 歲上限 5 mg。途徑不可混用。</small></article>
+              <article><span>10 / 處方栓劑</span><h3>Diclofenac 12.5 mg／顆</h3><dl><div><dt>目前年齡與體重</dt><dd>{selectedVitalSigns.stage}｜{formatNumber(workingWeight)} kg</dd></div><div><dt>PHPLS 教材速查</dt><dd>{diclofenac.dose}</dd></div></dl><small>{diclofenac.detail}。這是教材分段，不等同個別處方；TFDA 仿單適應症為緩解發炎與相關疼痛，兒童限一歲以上並依醫師處方。先核對禁忌、產品說明、地方 SOP 與醫療指導；是否可分割及置入方向不可自行假設。</small></article>
             </div>
             <div className="ruler-warning"><b>教學安全界線</b><p>實測公斤數與照顧者近期可靠體重優先；身長／體型估重通常比單純年齡公式精確。Best Guess 只提供族群平均估算，可能因體型、營養及族群差異高估或低估。這不是 Broselow® 原廠產品、醫療器材或處方工具；使用實體尺前應確認版次、批號與最新通知。</p></div>
             <div className="ruler-sources"><span>依據｜含 PHPLS 教材劑量表</span><a href="https://www.fda.gov.tw/tc/includes/GetFile.ashx?id=f636694231199735860" target="_blank" rel="noreferrer">TFDA Diclofenac 栓劑仿單 ↗</a><a href="https://pubmed.ncbi.nlm.nih.gov/18021105/" target="_blank" rel="noreferrer">Best Guess 原始研究 ↗</a><a href="https://www.sciencedirect.com/science/article/pii/S0300957213008873" target="_blank" rel="noreferrer">2014 體重估算比較研究 ↗</a><a href="https://cpr.heart.org/-/media/CPR-Files/CPR-Guidelines-Files/2025-Algorithms/Algorithm-PALS-CA-250123.pdf" target="_blank" rel="noreferrer">2025 AHA/AAP 小兒心停流程 ↗</a><a href="https://cpr.heart.org/-/media/CPR-Files/CPR-Guidelines-Files/2025-Algorithms/Algorithm-PALS-Bradycardia-250121.pdf" target="_blank" rel="noreferrer">2025 AHA/AAP 心搏過緩流程 ↗</a><a href="https://cpr.heart.org/-/media/CPR-Files/CPR-Guidelines-Files/2025-Algorithms/Algorithm-PALS-Tachyarrhythmia-250117.pdf?sc_lang=en" target="_blank" rel="noreferrer">2025 AHA/AAP 心搏過速流程 ↗</a><a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/neonatal-resuscitation" target="_blank" rel="noreferrer">2025 AHA/AAP 新生兒復甦 ↗</a><a href="https://www.resus.org.uk/professional-library/2025-resuscitation-guidelines/paediatric-basic-life-support-guidelines" target="_blank" rel="noreferrer">2025 RCUK 兒科生命支持 ↗</a><a href="https://iris.who.int/bitstream/handle/10665/382772/9789240114067-eng.pdf?sequence=1" target="_blank" rel="noreferrer">WHO 到院前緊急照護 ↗</a><a href="https://iris.who.int/bitstream/handle/10665/206540/9789241510264_eng.pdf?sequence=1" target="_blank" rel="noreferrer">WHO 新生兒復甦氣囊技術文件 ↗</a><a href="https://www.oregon.gov/oha/PH/PROVIDERPARTNERRESOURCES/EMS/EMSFORCHILDREN/Documents/Broselow-Cart-Manual.pdf" target="_blank" rel="noreferrer">Oregon EMSC 器材尺寸手冊 ↗</a><a href="https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfRes/res.cfm?ID=213894" target="_blank" rel="noreferrer">FDA 召回通知 ↗</a></div>
