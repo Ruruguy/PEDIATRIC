@@ -1,0 +1,15 @@
+"use client";
+import { useState } from "react";
+const flows = [
+  { id: "bls-single", label: "PBLS｜單人", scope: "嬰兒至青春期前・醫療專業人員", points: ["同時評估呼吸與脈搏，10秒內無法確認脈搏即開始CPR。", "有脈但呼吸不足：20–30次／分；有效氧合通氣後仍HR＜60且低灌流才壓胸。", "單人30:2；目擊突然倒下優先儘速取用AED。若仍獨自施救，完成約2分鐘CPR後依圖啟動／取AED。"], source: "pediatric-basic-life-support" },
+  { id: "bls-team", label: "PBLS｜兩人以上", scope: "嬰兒至青春期前・醫療專業人員", points: ["一人開始評估／CPR，另一人啟動系統並取AED。", "第一人先30:2，第二人加入後轉15:2；AED到場儘速使用。", "疑鴉片暴露可依流程給Naloxone，但不延誤通氣、CPR或AED。"], source: "pediatric-basic-life-support" },
+  { id: "cardiac-arrest", label: "PALS｜心跳停止", scope: "小兒VF／pVT、PEA／Asystole", points: ["VF／pVT：首次2 J/kg，第二次4 J/kg；後續≥4 J/kg，上限10 J/kg或成人最大能量。", "不可電擊節律儘早Epinephrine；可電擊節律優先電擊，依流程於第二次後給藥並每3–5分鐘。", "頑固VF／pVT選Amiodarone或Lidocaine；每2分鐘重評並找可逆原因。"], source: "pediatric-advanced-life-support" },
+  { id: "bradycardia", label: "PALS｜有脈緩脈", scope: "緩脈＋心肺功能受損", points: ["先維持氣道、氧合、必要的正壓通氣及監測。", "仍有功能受損且HR＜60：CPR、IV／IO與Epinephrine，並持續找原因。", "Atropine限迷走張力增加或原發AV block；考慮專家節律器治療，每2分鐘查脈。"], source: "pediatric-advanced-life-support" },
+  { id: "tachycardia", label: "PALS｜有脈心搏過速", scope: "先判穩定性，再看QRS與規則性", points: ["心肺功能受損包含急性意識改變、休克或低血壓。QRS≤0.09秒為窄，＞0.09秒為寬。", "不穩定：依節律考慮Adenosine或同步整流；0.5–1 J/kg，無效增至2 J/kg，鎮靜不延誤整流。", "穩定窄QRS：迷走刺激後Adenosine。穩定寬QRS僅規則且單型時可考慮Adenosine，並諮詢專家。"], source: "pediatric-advanced-life-support" },
+  { id: "post-arrest", label: "ROSC｜照護檢核表", scope: "心跳恢復後持續評估；院內項目供交班與學習", points: ["SpO₂目標94–98%或病童適當基準；PaCO₂依病況，避免嚴重高／低碳酸。", "維持SBP及MAP高於年齡／性別第10百分位；監測灌流、乳酸、尿量及電解質。", "避免發燒、監測血糖與癲癇；昏迷者由重症團隊規劃TTM。神經預後須多模式，至少72小時後並考慮干擾因素。"], source: "pediatric-advanced-life-support" },
+  { id: "newborn", label: "NRP｜出生時復甦", scope: "限出生轉銜；不直接套一般嬰兒OHCA", points: ["保暖、擺位、刺激與評估；呼吸暫停／喘息或HR＜100時建立有效通氣。", "有效通氣30秒後HR仍＜60，3:1壓胸通氣；協調壓胸與有效通氣60秒後仍＜60再按流程給藥。", "不常規胎便抽吸；氧濃度依孕週與導管前SpO₂滴定。"], source: "neonatal-resuscitation" },
+] as const;
+export default function Aha2025() {
+ const [index, setIndex] = useState(0); const f = flows[index];
+ return <section className="aha-library" id="aha2025"><div className="aha-heading"><p>AHA／AAP 2025 · 官方原圖與中文導讀</p><h2>小兒急救流程資料庫</h2><p>保留原圖完整內容及版權標示；中文為本站導讀，細節請搭配原PDF與轄區SOP。</p></div><div className="aha-choices" aria-label="選擇AHA2025流程">{flows.map((item,i)=><button key={item.id} aria-pressed={i===index} onClick={()=>setIndex(i)}>{item.label}</button>)}</div><article><h3>{f.label}</h3><p>{f.scope}</p><ol>{f.points.map(p=><li key={p}>{p}</li>)}</ol><p className="aha-links"><a href={`./aha2025/${f.id}.pdf`} target="_blank" rel="noreferrer">開啟完整PDF ↗</a><a href={`./aha2025/${f.id}.pdf`} download>下載原檔</a><a href={`https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/${f.source}`} target="_blank" rel="noreferrer">AHA官方指引 ↗</a></p><a href={`./aha2025/${f.id}.pdf`} target="_blank" rel="noreferrer" aria-label={`放大${f.label}原圖`}><img src={`./aha2025/${f.id}.png`} alt={`2025 AHA／AAP ${f.label}完整原圖，英文細節可開啟PDF放大`} loading="lazy" /></a></article><p>版本：AHA／AAP 2025。提供檔案共7份（含既有新生兒原檔）；不是所有AHA成人／特殊情況流程的全集。異物梗塞另見本站「急救流程圖」。核對：2026-11-10。</p></section>;
+}

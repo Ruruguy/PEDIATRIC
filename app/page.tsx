@@ -1,5 +1,8 @@
 "use client";
 
+import { AirwayReference, MedicationReference } from "./clinical-additions";
+import Aha2025 from "./aha2025";
+
 import { useEffect, useMemo, useState } from "react";
 
 type AgeKey = "newborn" | "infant" | "child";
@@ -256,7 +259,7 @@ type OhcaKey = "newborn" | "infant" | "child";
 type RhythmKey = "shockable" | "nonshockable";
 
 const rulerZones = [
-  { key: "gray", label: "灰", minCm: 46.8, maxCm: 59.2, minKg: 3, maxKg: 5, estimate: 4, color: "#9aa0a3", ink: "#102b31", cuffed: "3.0", uncuffed: "2.5", depth: "9–10.5" },
+  { key: "gray", label: "灰", minCm: 46.8, maxCm: 59.2, minKg: 3, maxKg: 5, estimate: 4, color: "#9aa0a3", ink: "#102b31", cuffed: "3.0", uncuffed: "3.0–3.5", depth: "9–10.5" },
   { key: "pink", label: "粉紅", minCm: 59.2, maxCm: 66.9, minKg: 6, maxKg: 7, estimate: 6.5, color: "#ee7da2", ink: "#102b31", cuffed: "3.0", uncuffed: "3.5", depth: "10–10.5" },
   { key: "red", label: "紅", minCm: 66.9, maxCm: 74.2, minKg: 8, maxKg: 9, estimate: 8.5, color: "#d84a48", ink: "#fff", cuffed: "3.0", uncuffed: "3.5", depth: "10.5–11" },
   { key: "purple", label: "紫", minCm: 74.2, maxCm: 83.8, minKg: 10, maxKg: 11, estimate: 10.5, color: "#76549c", ink: "#fff", cuffed: "3.5", uncuffed: "4.0", depth: "11–12" },
@@ -538,6 +541,8 @@ export default function Home() {
           <a href="#clinical-reference" onClick={() => setMenuOpen(false)}>創傷／兒保</a>
           <a href="#pathology" onClick={() => setMenuOpen(false)}>疾病學理</a>
           <a href="#navigator" onClick={() => setMenuOpen(false)}>急症導航</a>
+          <a href="#aha2025" onClick={() => setMenuOpen(false)}>AHA 2025 原圖</a>
+          <a href="#medication-reference" onClick={() => setMenuOpen(false)}>藥物分類</a>
           <a href="#quick-flow" onClick={() => setMenuOpen(false)}>急救流程圖</a>
           <a href="#compression-guide" onClick={() => setMenuOpen(false)}>壓胸速查</a>
           <a href="#ohca" onClick={() => setMenuOpen(false)}>OHCA 流程</a>
@@ -746,6 +751,8 @@ export default function Home() {
         </div>
       </section>
 
+      <Aha2025 />
+
       <section className="quick-flow-section" id="quick-flow">
         <div className="quick-flow-heading">
           <div className="section-label"><span>04</span><p>QUICK FLOW<br />急救流程圖</p></div>
@@ -948,7 +955,7 @@ export default function Home() {
             <div className="output-top"><div><span>{rulerMode === "bestGuess" ? "ESTIMATED WEIGHT" : "WORKING WEIGHT"}</span><b>{formatNumber(workingWeight)}<small>kg</small></b></div><p>{rulerMode === "bestGuess" ? `目前體重來自 Best Guess：${bestGuessFormula}。須口頭說明為估算值；` : ""}每次給藥前交叉核對病人、體重來源、適應症、藥名、濃度、mg 與 mL。</p></div>
             <div className="output-grid">
               <article><span>01 / 電擊</span><h3>去顫能量</h3><dl><div><dt>第一次</dt><dd>{formatNumber(workingWeight * 2)} J</dd></div><div><dt>第二次</dt><dd>{formatNumber(workingWeight * 4)} J</dd></div><div><dt>後續</dt><dd>≥ {formatNumber(workingWeight * 4)} J</dd></div></dl><small>後續不超過 10 J/kg 或成人最大劑量。</small></article>
-              <article><span>02 / 急救藥物</span><h3>依問題 × 途徑整合</h3><dl><div><dt>OHCA｜Epinephrine IV／IO</dt><dd>{formatNumber(Math.min(workingWeight * .01, 1))} mg</dd></div><div><dt>0.1 mg/mL 製劑｜IV／IO</dt><dd>{formatNumber(Math.min(workingWeight * .1, 10))} mL</dd></div><div><dt>嚴重過敏｜Epinephrine IM</dt><dd>{formatNumber(Math.min(workingWeight * .01, .3))} mg＝{formatNumber(Math.min(workingWeight * .01, .3))} mL</dd></div><div><dt>VF／無脈 VT｜Amiodarone IV／IO</dt><dd>{formatNumber(Math.min(workingWeight * 5, 300))} mg</dd></div><div><dt>替代｜Lidocaine IV／IO</dt><dd>{formatNumber(workingWeight)} mg</dd></div></dl><small>OHCA：Epinephrine 0.01 mg/kg，單次上限 1 mg、每 3–5 分鐘。嚴重過敏：1 mg/mL 製劑 IM 0.01 mg/kg，單次上限 0.3 mg，必要時每 5–10 分鐘依流程重複。適應症、濃度與途徑不可互換。</small></article>
+              <article><span>02 / 急救藥物</span><h3>依問題 × 途徑整合</h3><dl><div><dt>OHCA｜Epinephrine IV／IO</dt><dd>{formatNumber(Math.min(workingWeight * .01, 1))} mg</dd></div><div><dt>0.1 mg/mL 製劑｜IV／IO</dt><dd>{formatNumber(Math.min(workingWeight * .1, 10))} mL</dd></div><div><dt>嚴重過敏｜Epinephrine IM</dt><dd>{formatNumber(Math.min(workingWeight * .01, .3))} mg＝{formatNumber(Math.min(workingWeight * .01, .3))} mL</dd></div><div><dt>VF／無脈 VT｜Amiodarone IV／IO</dt><dd>{formatNumber(Math.min(workingWeight * 5, 300))} mg</dd></div><div><dt>Amiodarone第2、3劑（各上限150 mg）</dt><dd>{formatNumber(Math.min(workingWeight * 5, 150))} mg</dd></div><div><dt>替代｜Lidocaine IV／IO</dt><dd>{formatNumber(workingWeight)} mg</dd></div></dl><small>OHCA：Epinephrine 0.01 mg/kg，單次上限 1 mg、每 3–5 分鐘。嚴重過敏：1 mg/mL 製劑 IM 0.01 mg/kg，單次上限 0.3 mg，必要時每 5–10 分鐘依流程重複。適應症、濃度與途徑不可互換。</small></article>
               <article><span>03 / 氣道</span><h3>起始尺寸</h3><dl><div><dt>有囊 ETT</dt><dd>{outsideColorRange ? "依 SOP" : `${activeZone.cuffed} mm`}</dd></div><div><dt>無囊 ETT</dt><dd>{outsideColorRange ? "依 SOP" : `${activeZone.uncuffed} mm`}</dd></div><div><dt>口角深度</dt><dd>{outsideColorRange ? "依 SOP" : `${activeZone.depth} cm`}</dd></div><div><dt>LMA</dt><dd>Size {outsideColorRange ? "依器材 IFU" : lmaSizeFor(workingWeight)}</dd></div></dl><small>準備相鄰尺寸；超出色帶範圍時不套用色區尺寸。以胸廓、聽診、波形 ETCO₂ 及影像確認位置。</small></article>
               <article><span>05 / 通氣</span><h3>潮氣量速算</h3><dl><div><dt>{selectedVitalSigns.stage}｜{tidalRange[0]}–{tidalRange[1]} mL/kg</dt><dd>{formatNumber(workingWeight * tidalRange[0])}–{formatNumber(workingWeight * tidalRange[1])} mL</dd></div><div><dt>目前年齡帶</dt><dd>{selectedVitalSigns.age}</dd></div></dl><small>僅作設備可監測容量時的起始參考；手壓 BVM 不應追求把氣囊擠完，以可見胸廓起伏、心率、血氧與波形 ETCO₂ 調整。</small></article>
               <article><span>04 / 循環</span><h3>補液／創傷血品速算</h3><dl><div><dt>晶體液 10 mL/kg</dt><dd>{formatNumber(workingWeight * 10)} mL</dd></div><div><dt>晶體液 20 mL/kg</dt><dd>{formatNumber(workingWeight * 20)} mL</dd></div><div><dt>pRBC 10 mL/kg</dt><dd>{formatNumber(workingWeight * 10)} mL</dd></div></dl><small>PHPLS：晶體液 10–20 mL/kg 於 10–15 分鐘分次給予，每次後重評。創傷出血對晶體液反應不佳時，AHA／PHPLS 教材列 pRBC 10 mL/kg；僅在系統有血品、符合層級與 protocol／醫療指導時執行。首小時 40–60 mL/kg 是累積警戒，不是必須達到的目標。</small></article>
@@ -958,6 +965,8 @@ export default function Home() {
               <article><span>09 / 呼吸藥物</span><h3>WHEEZING 與 CROUP 分開看</h3><dl><div><dt>WHEEZING｜核准自備 MDI</dt><dd>2 噴／次</dd></div><div><dt>WHEEZING｜每噴間隔</dt><dd>1 分鐘</dd></div><div><dt>WHEEZING｜送醫＞20 分鐘</dt><dd>每 20 分鐘可再給</dd></div><div><dt>WHEEZING｜IH A+B／單 B，＜5 歲</dt><dd>先核對製劑 mg/mL 與處方</dd></div><div><dt>嚴重 WHEEZING｜Epinephrine SC</dt><dd>0.3–0.5 mg</dd></div><div><dt>CROUP 哮吼｜Epinephrine IH 0.5 mg/kg</dt><dd>{croupEpinephrineDose === null ? "4–5 歲帶：核對實際年齡" : `${formatNumber(croupEpinephrineDose)} mg`}</dd></div><div><dt>CROUP 哮吼｜PHPLS 上限</dt><dd>{croupEpinephrineMax === null ? "依實際年齡／SOP" : `${croupEpinephrineMax} mg`}</dd></div></dl><small>WHEEZING：A＋B／單 B 以氧氣 6 L/min 霧化；SC Epinephrine 僅限嚴重病人、先聯絡醫療指導並核對心血管禁忌。CROUP：Epinephrine 不稀釋；＜4 歲上限 2.5 mg、＞4 歲上限 5 mg。途徑不可混用。</small></article>
               <article><span>10 / 處方栓劑</span><h3>Diclofenac 12.5 mg／顆</h3><dl><div><dt>目前年齡與體重</dt><dd>{selectedVitalSigns.stage}｜{formatNumber(workingWeight)} kg</dd></div><div><dt>PHPLS 教材速查</dt><dd>{diclofenac.dose}</dd></div></dl><small>{diclofenac.detail}。這是教材分段，不等同個別處方；TFDA 仿單適應症為緩解發炎與相關疼痛，兒童限一歲以上並依醫師處方。先核對禁忌、產品說明、地方 SOP 與醫療指導；是否可分割及置入方向不可自行假設。</small></article>
             </div>
+            <AirwayReference />
+            <MedicationReference maternal />
             <div className="ruler-warning"><b>教學安全界線</b><p>實測公斤數與照顧者近期可靠體重優先；身長／體型估重通常比單純年齡公式精確。Best Guess 只提供族群平均估算，可能因體型、營養及族群差異高估或低估。這不是 Broselow® 原廠產品、醫療器材或處方工具；使用實體尺前應確認版次、批號與最新通知。</p></div>
             <div className="ruler-sources"><span>依據｜含 PHPLS 教材劑量表</span><a href="https://www.fda.gov.tw/tc/includes/GetFile.ashx?id=f636694231199735860" target="_blank" rel="noreferrer">TFDA Diclofenac 栓劑仿單 ↗</a><a href="https://pubmed.ncbi.nlm.nih.gov/18021105/" target="_blank" rel="noreferrer">Best Guess 原始研究 ↗</a><a href="https://www.sciencedirect.com/science/article/pii/S0300957213008873" target="_blank" rel="noreferrer">2014 體重估算比較研究 ↗</a><a href="https://cpr.heart.org/-/media/CPR-Files/CPR-Guidelines-Files/2025-Algorithms/Algorithm-PALS-CA-250123.pdf" target="_blank" rel="noreferrer">2025 AHA/AAP 小兒心停流程 ↗</a><a href="https://cpr.heart.org/-/media/CPR-Files/CPR-Guidelines-Files/2025-Algorithms/Algorithm-PALS-Bradycardia-250121.pdf" target="_blank" rel="noreferrer">2025 AHA/AAP 心搏過緩流程 ↗</a><a href="https://cpr.heart.org/-/media/CPR-Files/CPR-Guidelines-Files/2025-Algorithms/Algorithm-PALS-Tachyarrhythmia-250117.pdf?sc_lang=en" target="_blank" rel="noreferrer">2025 AHA/AAP 心搏過速流程 ↗</a><a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/neonatal-resuscitation" target="_blank" rel="noreferrer">2025 AHA/AAP 新生兒復甦 ↗</a><a href="https://www.resus.org.uk/professional-library/2025-resuscitation-guidelines/paediatric-basic-life-support-guidelines" target="_blank" rel="noreferrer">2025 RCUK 兒科生命支持 ↗</a><a href="https://iris.who.int/bitstream/handle/10665/382772/9789240114067-eng.pdf?sequence=1" target="_blank" rel="noreferrer">WHO 到院前緊急照護 ↗</a><a href="https://iris.who.int/bitstream/handle/10665/206540/9789241510264_eng.pdf?sequence=1" target="_blank" rel="noreferrer">WHO 新生兒復甦氣囊技術文件 ↗</a><a href="https://www.oregon.gov/oha/PH/PROVIDERPARTNERRESOURCES/EMS/EMSFORCHILDREN/Documents/Broselow-Cart-Manual.pdf" target="_blank" rel="noreferrer">Oregon EMSC 器材尺寸手冊 ↗</a><a href="https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfRes/res.cfm?ID=213894" target="_blank" rel="noreferrer">FDA 召回通知 ↗</a></div>
           </div>
