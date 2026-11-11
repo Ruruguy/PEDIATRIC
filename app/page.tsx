@@ -1,4 +1,5 @@
 "use client";
+import GcsVerbalReference from "./gcs-reference";
 
 import { AirwayReference, MedicationReference } from "./clinical-additions";
 import Aha2025 from "./aha2025";
@@ -538,6 +539,7 @@ export default function Home() {
           <a href="#ages" onClick={() => setMenuOpen(false)}>年齡分流</a>
           <a href="#vitals" onClick={() => setMenuOpen(false)}>生命徵象</a>
           <a href="#fluid-guide" onClick={() => setMenuOpen(false)}>輸液速查</a>
+          <a href="#gcs-verbal" onClick={() => setMenuOpen(false)}>小兒GCS</a>
           <a href="#clinical-reference" onClick={() => setMenuOpen(false)}>創傷／兒保</a>
           <a href="#pathology" onClick={() => setMenuOpen(false)}>疾病學理</a>
           <a href="#navigator" onClick={() => setMenuOpen(false)}>急症導航</a>
@@ -698,17 +700,7 @@ export default function Home() {
           <p>把小兒創傷教材中容易漏掉的三組內容放在一起：發展適齡 GCS、燒燙傷含糖維持液，以及兒少保護通報。</p>
         </div>
 
-        <article className="pgcs-card">
-          <div className="pgcs-intro"><span>PEDIATRIC GCS</span><h3>4 歲以下：V 分數看的是發展適齡反應</h3><p>不能要求尚未具備完整語言能力的孩子回答人物、時間與地點。請記錄 E、V、M 各分項與實際表現，不只寫總分。</p></div>
-          <div className="pgcs-table-wrap"><table><caption>4 歲以下 Pediatric GCS｜最佳語言反應</caption><thead><tr><th>V</th><th>可觀察表現</th><th>現場口語描述</th></tr></thead><tbody>
-            <tr><th>5</th><td>清醒；能社交微笑、注視追蹤，咿呀／牙牙學語或說出符合平常能力的字詞</td><td>「互動與發聲符合平日」</td></tr>
-            <tr><th>4</th><td>哭泣但可安撫；字詞比平常少，或自發出現煩躁哭聲</td><td>「會哭，但照顧者可安撫」</td></tr>
-            <tr><th>3</th><td>持續煩躁、哭聲不恰當或難以安撫</td><td>「持續易怒／哭鬧，無法正常互動」</td></tr>
-            <tr><th>2</th><td>只對疼痛刺激發出呻吟聲</td><td>「痛刺激時僅呻吟」</td></tr>
-            <tr><th>1</th><td>無任何語音或哭聲反應</td><td>「對疼痛無語音反應」</td></tr>
-          </tbody></table></div>
-          <div className="pgcs-note"><b>版本提醒</b><p>Pediatric GCS 有不同修正版；V3 的用語可能寫成「持續煩躁」或「只對疼痛哭」。同一機構應使用同一張表，趨勢追蹤時不要中途換版本。</p></div>
-        </article>
+        <article className="pgcs-card"><div className="pgcs-intro"><span>PEDIATRIC GCS</span><h3>4 歲以下：V 分數看的是發展適齡反應</h3></div><GcsVerbalReference /></article>
 
         <div className="burn-protection-grid">
           <article className="burn-dextrose-card"><span>BURN / ≤30 KG</span><h3>燒燙傷復甦液之外，還要顧基礎糖分。</h3><p>ABLS 教材將嬰幼兒及體重 ≤30 kg 兒童列為低肝醣儲備族群：除燒傷復甦液外，另給含 5% dextrose 的 Lactated Ringer&apos;s 維持液，並持續監測血糖。</p><ul><li>含糖維持液與燒傷復甦公式是兩筆不同需求，不可互相取代或重複計算。</li><li>現場若無合適預混液，不自行把高濃度葡萄糖加入輸液袋；依地方 burn／pediatric protocol 與醫療指導。</li><li>使用 Lund–Browder chart 或病童手掌約 1% 估算，不用成人九法則直接套小兒。</li></ul><div><b>低血糖、意識變化、失溫與尿量</b><span>都是持續重評指標。</span></div></article>
@@ -736,6 +728,7 @@ export default function Home() {
             <div className="pathology-danger"><div><b>惡化警訊</b><p>{currentPathology.danger}</p></div><div><b>避免誤判</b><p>{currentPathology.avoid}</p></div></div>
           </article>
         </div>
+        <p className="gcs-chapter-link">抽搐後、頭部外傷或DKA意識變化：追蹤各分項與實際表現，<a href="#gcs-verbal">小兒GCS語言反應如何評估 →</a></p>
         <div className="pathology-sources"><span>核心依據｜APLS 第三版＋AHA／AAP 2025 PALS</span><a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/pediatric-advanced-life-support" target="_blank" rel="noreferrer">PALS Guidelines ↗</a></div>
       </section>
 
@@ -746,6 +739,7 @@ export default function Home() {
           <article className="emergency-panel">
             <div className="emergency-title"><p>辨識線索</p><h3>{currentEmergency.label}</h3><blockquote>{currentEmergency.cue}</blockquote></div>
             <div className="flow">{currentEmergency.steps.map((step, index) => <div className="flow-step" key={step.title}><span>{index + 1}</span><div><b>{step.title}</b><p>{step.detail}</p></div></div>)}</div>
+            {(emergency === "seizure" || emergency === "trauma") && <p className="gcs-chapter-link">D 神經評估：記錄 E／V／M 與平常能力，<a href="#gcs-verbal">查看小兒 V 語言反應對照 →</a></p>}
             <div className="field-note"><span>FIELD NOTE</span><p>{currentEmergency.note}</p></div>
           </article>
         </div>
